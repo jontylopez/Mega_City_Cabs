@@ -1,7 +1,10 @@
 users\UsersCRUD.class
 com\mycompany\restapimccabs\JakartaRestConfiguration.class
 DBOperations\ConnectionHelper.class
+userDetails\UserDetails.class
 DBOperations\passwordHashing.class
+com\mycompany\restapimccabs\resources\UserDetailsJakartaEE8Resources.class
 com\mycompany\restapimccabs\resources\JakartaEE8Resource.class
+userDetails\UserDetailsCRUD.class
 users\Users.class
 com\mycompany\restapimccabs\resources\UsersJakartaEE8Resources.class

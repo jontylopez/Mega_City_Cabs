@@ -27,15 +27,23 @@ import javax.ws.rs.core.Response;
 public class UsersJakartaEE8Resources {
 
     // ✅ Create User (POST)
-    @POST
-    @Path("/create")
-    public Response createUser(Users user) {
-        boolean isCreated = UsersCRUD.createUser(user);
-        if (isCreated) {
-            return Response.status(Response.Status.CREATED).entity("User created successfully").build();
-        }
-        return Response.status(Response.Status.BAD_REQUEST).entity("Failed to create user").build();
+   @POST
+@Path("/create")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+public Response createUser(Users user) {
+    int userId = UsersCRUD.createUserAndGetId(user); // Get userId after insert
+    if (userId > 0) {
+        return Response.status(Response.Status.CREATED)
+                .entity("{\"message\": \"User created successfully\", \"userId\": " + userId + "}")
+                .build();
+    } else {
+        return Response.status(Response.Status.BAD_REQUEST)
+                .entity("{\"message\": \"Failed to create user\"}")
+                .build();
     }
+}
+
 
     // ✅ Get User by ID (GET)
     @GET

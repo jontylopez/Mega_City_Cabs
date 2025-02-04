@@ -20,6 +20,28 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class UsersCRUD {
     private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
      // Create User (INSERT)
+    public static int createUserAndGetId(Users user) {
+    String query = "INSERT INTO users (username, password, uRole) VALUES (?, ?, ?)";
+    try (Connection conn = ConnectionHelper.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
+
+        pstmt.setString(1, user.getUserName());
+        pstmt.setString(2, user.getPassword());  // Store hashed password
+        pstmt.setString(3, user.getuRole());
+
+        int rowsInserted = pstmt.executeUpdate();
+        if (rowsInserted > 0) {
+            ResultSet generatedKeys = pstmt.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                return generatedKeys.getInt(1); // Return the generated userId
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return -1; // If insertion fails, return -1
+}
+
     public static boolean createUser(Users user) {
         String query = "INSERT INTO users (username, password, uRole) VALUES (?, ?, ?)";
         try (Connection conn = ConnectionHelper.getConnection();
@@ -88,27 +110,30 @@ public class UsersCRUD {
 
     // Read All Users (SELECT)
     public static List<Users> getAllUsers() {
-        List<Users> userList = new ArrayList<>();
-        String query = "SELECT * FROM users";
-        try (Connection conn = ConnectionHelper.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query);
-             ResultSet rs = pstmt.executeQuery()) {
+    List<Users> userList = new ArrayList<>();
+    String query = "SELECT * FROM users";
+    try (Connection conn = ConnectionHelper.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(query);
+         ResultSet rs = pstmt.executeQuery()) {
 
-            while (rs.next()) {
-                Users user = new Users();
-                user.setId(rs.getInt("id"));
-                user.setUserName(rs.getString("username"));
-                user.setPassword(rs.getString("password"));
-                user.setuRole(rs.getString("uRole"));
-                userList.add(user);
-            }
+        System.out.println("🔍 Running Query: " + query); // Debugging line
 
-        } catch (SQLException e) {
-            e.printStackTrace();
+        while (rs.next()) {
+            Users user = new Users();
+            user.setId(rs.getInt("id"));
+            user.setUserName(rs.getString("username"));
+            user.setPassword(rs.getString("password"));
+            user.setuRole(rs.getString("uRole"));
+            userList.add(user);
         }
-        return userList;
-    }
 
+        System.out.println("✅ Users retrieved: " + userList.size()); // Debugging line
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return userList;
+}
     // Update User (UPDATE)
     public static boolean updateUser(Users user) {
         String query = "UPDATE users SET username = ?, password = ?, uRole = ? WHERE id = ?";
