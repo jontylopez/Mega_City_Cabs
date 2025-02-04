@@ -1,10 +1,7 @@
-D:\ICBT\TopUp\SEM1\Advance Programing\Assingment\MegaCityCabs\restAPIMCCabs\src\main\java\userDetails\UserDetails.java
-D:\ICBT\TopUp\SEM1\Advance Programing\Assingment\MegaCityCabs\restAPIMCCabs\src\main\java\com\mycompany\restapimccabs\resources\UserDetailsJakartaEE8Resources.java
-D:\ICBT\TopUp\SEM1\Advance Programing\Assingment\MegaCityCabs\restAPIMCCabs\src\main\java\users\Users.java
-D:\ICBT\TopUp\SEM1\Advance Programing\Assingment\MegaCityCabs\restAPIMCCabs\src\main\java\com\mycompany\restapimccabs\resources\UsersJakartaEE8Resources.java
-D:\ICBT\TopUp\SEM1\Advance Programing\Assingment\MegaCityCabs\restAPIMCCabs\src\main\java\users\UsersCRUD.java
-D:\ICBT\TopUp\SEM1\Advance Programing\Assingment\MegaCityCabs\restAPIMCCabs\src\main\java\userDetails\UserDetailsCRUD.java
+D:\ICBT\TopUp\SEM1\Advance Programing\Assingment\MegaCityCabs\restAPIMCCabs\src\main\java\DB\UsersCRUD.java
+D:\ICBT\TopUp\SEM1\Advance Programing\Assingment\MegaCityCabs\restAPIMCCabs\src\main\java\DBConnection\ConnectionHelper.java
+D:\ICBT\TopUp\SEM1\Advance Programing\Assingment\MegaCityCabs\restAPIMCCabs\src\main\java\DBConnection\passwordHashing.java
 D:\ICBT\TopUp\SEM1\Advance Programing\Assingment\MegaCityCabs\restAPIMCCabs\src\main\java\com\mycompany\restapimccabs\JakartaRestConfiguration.java
+D:\ICBT\TopUp\SEM1\Advance Programing\Assingment\MegaCityCabs\restAPIMCCabs\src\main\java\DB\Users.java
 D:\ICBT\TopUp\SEM1\Advance Programing\Assingment\MegaCityCabs\restAPIMCCabs\src\main\java\com\mycompany\restapimccabs\resources\JakartaEE8Resource.java
-D:\ICBT\TopUp\SEM1\Advance Programing\Assingment\MegaCityCabs\restAPIMCCabs\src\main\java\DBOperations\ConnectionHelper.java
-D:\ICBT\TopUp\SEM1\Advance Programing\Assingment\MegaCityCabs\restAPIMCCabs\src\main\java\DBOperations\passwordHashing.java
+D:\ICBT\TopUp\SEM1\Advance Programing\Assingment\MegaCityCabs\restAPIMCCabs\src\main\java\com\mycompany\restapimccabs\resources\UserService.java

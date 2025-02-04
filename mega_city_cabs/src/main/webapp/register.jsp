@@ -89,6 +89,7 @@
                 text-decoration: underline;
             }
         </style>
+        <link rel="icon" href="data:,">
     </head>
     <body class="d-flex align-items-center vh-100 bg-light">
 
@@ -98,12 +99,12 @@
                 <a href="index.jsp">← Back to Home</a>
             </div>
 
-            <form action="RegisterServlet" method="POST" onsubmit="return validatePassword()">
+            <form id="registerForm" action="RegisterServlet" method="POST" ">
                 <img class="mb-4" src="./images/taxi_logo.png" alt="Mega City Cabs Logo">
                 <h1 class="h3 mb-3 fw-normal">Create an Account</h1>
 
                 <div class="form-floating mb-3">
-                    <input type="text" class="form-control" id="name" name="name" placeholder="Full Name" required>
+                    <input type="text" class="form-control" id="fullName" name="name" placeholder="Full Name" required>
                     <label for="name">Full Name</label>
                 </div>
 
@@ -128,7 +129,7 @@
                 </div>
 
                 <div class="form-floating mb-3">
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                    <input type="password" class="form-control" id="pWord" name="password" placeholder="Password" required>
                     <label for="password">Password</label>
                 </div>
 
@@ -145,90 +146,88 @@
 
                 <p class="mt-5 mb-3 text-body-secondary">© 2025 Mega City Cabs</p>
             </form>
+            <div id="messageBox" class="alert d-none"></div>
         </main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                let registerForm = document.getElementById("registerForm");
+                if (!registerForm) {
+                    console.error("❌ ERROR: registerForm not found!");
+                    return;
+                }
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
-        
-    document.getElementById("registerForm").addEventListener("submit", function(event) {
-        event.preventDefault(); // Prevent default form submission
+                registerForm.addEventListener("submit", async function (event) {
+                    event.preventDefault();
 
-        // Get form values
-        var name = document.getElementById("name").value;
-        var address = document.getElementById("address").value;
-        var phone = document.getElementById("phone").value;
-        var email = document.getElementById("email").value;
-        var username = document.getElementById("username").value;
-        var password = document.getElementById("password").value;
-        var confirmPassword = document.getElementById("confirmPassword").value;
+                    let fullName = document.getElementById("fullName").value.trim();
+                    let address = document.getElementById("address").value.trim();
+                    let phone = document.getElementById("phone").value.trim();
+                    let email = document.getElementById("email").value.trim();
+                    let username = document.getElementById("username").value.trim();
+                    let pWord = document.getElementById("pWord").value.trim();
+                    let confirmPassword = document.getElementById("confirmPassword").value.trim();
 
-        // Password Validation
-        if (password !== confirmPassword) {
-            showMessage("Passwords do not match!", "danger");
-            return;
-        }
+                    if (pWord !== confirmPassword) {
+                        showMessage("❌ Passwords do not match!", "danger");
+                        return;
+                    }
 
-        // Create User JSON (For users table)
-        var userData = {
-            userName: username,
-            password: password,
-            uRole: "cus" // Default role: customer
-        };
+                    if (!fullName || !address || !phone || !email || !username || !pWord) {
+                        showMessage("⚠️ Please fill in all required fields!", "warning");
+                        return;
+                    }
 
-        // Step 1: Register User in users table
-       fetch("http://localhost:8080/restAPIMCCabs/api/users/create", {
+                    let requestData = {
+                        username: username,
+                        pWord: pWord,
+                        uRole: "cus",
+                        fullName: fullName,
+                        address: address,
+                        phone: phone,
+                        email: email
+                    };
 
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(userData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.userId) {  // Check if userId is returned
-                let userId = data.userId;
+                    try {
+                        let response = await fetch("http://localhost:8080/restAPIMCCabs/api/users/create", {
+                            method: "POST",
+                            headers: {"Content-Type": "application/json"},
+                            body: JSON.stringify(requestData)
+                        });
 
-                // Create User Details JSON (For user_details table)
-                var userDetailsData = {
-                    userId: userId,
-                    name: name,
-                    address: address,
-                    phone: phone,
-                    email: email
-                };
+                        let responseData = await response.json();
 
-                // Step 2: Insert User Details in user_details table
-                fetch("http://localhost:8080/restAPIMCCabs/api/userDetails/create", {
+                        if (!response.ok) {
+                            if (response.status === 409) {
+                                showMessage("⚠️ Username or Email is already taken!", "warning");
+                            } else {
+                                throw new Error(responseData.message || "Registration failed");
+                            }
+                            return;
+                        }
 
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(userDetailsData)
+                        // ✅ Alert for successful registration
+                        alert("✅ User Registration Successful!");
+                        showMessage("✅ User registered successfully! Redirecting to login...", "success");
+
+                        setTimeout(() => window.location.href = "login.jsp", 2000);
+
+                    } catch (error) {
+                        showMessage(error.message || "❌ Registration failed! Please try again.", "danger");
+                    }
                 });
-            } else {
-                throw new Error("User registration failed");
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message.includes("successfully")) {
-                showMessage("User registered successfully!", "success");
-                setTimeout(() => window.location.href = "login.jsp", 2000);
-            } else {
-                throw new Error("User details registration failed");
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            showMessage(error.message || "Registration failed! Please try again.", "danger");
-        });
-    });
 
-    // Function to Show Success/Error Message
-    function showMessage(message, type) {
-        var messageBox = document.getElementById("messageBox");
-        messageBox.className = `alert alert-${type} mt-3`;
-        messageBox.textContent = message;
-        messageBox.classList.remove("d-none");
-    }
-</script>
+                function showMessage(message, type) {
+                    let messageBox = document.getElementById("messageBox");
+                    if (messageBox) {
+                        messageBox.className = `alert alert-${type} mt-3`;
+                        messageBox.textContent = message;
+                        messageBox.classList.remove("d-none");
+                    }
+                }
+            });
+        </script>
+
 
     </body>
 </html>
