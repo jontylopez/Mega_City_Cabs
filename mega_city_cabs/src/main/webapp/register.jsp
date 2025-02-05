@@ -17,7 +17,7 @@
             .form-register {
                 min-width: 500px;
                 padding: 20px;
-                margin: auto;
+                margin: auto;              
                 text-align: center;
                 background: rgba(255, 255, 255, 0.95); /* Light contrast */
                 border-radius: 10px;
@@ -91,7 +91,7 @@
         </style>
         <link rel="icon" href="data:,">
     </head>
-    <body class="d-flex align-items-center vh-100 bg-light">
+    <body class="d-flex align-items-center vh-100 my-50 bg-dark">
 
         <main class="form-register">
             <!-- Home Link -->

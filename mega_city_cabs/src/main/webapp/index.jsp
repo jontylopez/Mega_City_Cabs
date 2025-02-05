@@ -59,7 +59,7 @@
                 font-size: 18px;
                 font-weight: bold;
                 margin-right: 20px;
-                 padding: 12px 20px; /* Same as nav-link */
+                padding: 12px 20px; /* Same as nav-link */
                 min-width: 130px; /* Ensures width consistency */
                 cursor: pointer;
                 text-align:  center;
@@ -104,7 +104,23 @@
                 justify-content: center;
                 text-align: center;
                 padding: 50px;
-                background: rgba(0, 0, 0, 0.6);
+                background: url('./images/bgImage.jpg') no-repeat center center/cover;
+                position: relative;
+            }
+
+            .hero::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5); /* Dark overlay */
+            }
+            .hero div {
+                position: relative;
+                color: white;
+                z-index: 2;
             }
             .hero h1 {
                 font-size: 48px;
@@ -130,21 +146,171 @@
                 color: white;
             }
 
-            /* Services Section (Full Height) */
-            .services {
-                min-height: 100vh;
-                background: #f8f9fa;
-                padding: 50px 20px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            .carousel-inner img {
-                width: 100%;
-                height: 90vh; /* Adjusted for full height */
-                object-fit: cover;
+            /* Scroll Wrapper */
+            .scroll-wrapper {
+                overflow: hidden;
+                position: relative;
             }
 
+            /* Scrollable Services Container */
+            .services-container {
+                display: flex;
+                gap: 15px;
+                padding-bottom: 10px;
+                white-space: nowrap;
+                scroll-behavior: smooth;
+                overflow-x: auto;
+                cursor: grab;
+                align-items: center; /* Ensures all cards align properly */
+                 user-select: none; /* Disable text selection */
+                -webkit-user-select: none; /* Safari */
+                -moz-user-select: none; /* Firefox */
+                -ms-user-select: none; /* IE */
+            }
+
+            /* Hide Scrollbar */
+            .services-container::-webkit-scrollbar {
+                display: none;
+            }
+
+            /* Individual Service Card */
+            .service-card {
+                flex: 0 0 auto;
+                width: 250px;
+                height: 320px; /* Fixed height */
+                padding: 20px;
+                color: black;
+                background: #ffffff;
+                border-radius: 10px;
+                text-align: center;
+                box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+                scroll-snap-align: center;
+                transition: transform 0.3s ease-in-out;
+
+                /* Ensuring content stays inside */
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                align-items: center; /* Center everything */
+            }
+
+            /* Service Card Image */
+            .service-card img {
+                width: 80px;
+                height: auto;
+                object-fit: contain; /* Prevents image distortion */
+                margin-bottom: 10px;
+            }
+
+            /* Service Card Title */
+            .service-card h5 {
+                font-size: 16px;
+                font-weight: bold;
+                color: #333;
+                margin-bottom: 5px;
+                text-align: center;
+                white-space: normal;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 90%; /* Ensures it fits within the card */
+            }
+
+            /* Service Card Text */
+            .service-card p {
+                font-size: 14px;
+                color: #666;
+                white-space: normal;
+                text-align: center;
+                margin: 0;
+                padding: 0 10px;
+                line-height: 1.4;
+
+                /* Preventing text from breaking out */
+                word-wrap: break-word;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-height: 60px; /* Prevents too much text overflow */
+            }
+         
+           
+
+            /* Prevent image dragging */
+            .service-card img {
+                pointer-events: none; /* Disable image interactions */
+                user-drag: none; /* Disable default image dragging */
+                -webkit-user-drag: none; /* Safari */
+            }
+
+
+            /* Hover Effect */
+            .service-card:hover {
+                transform: scale(1.05);
+            }
+
+            /* Scroll Buttons */
+            .scroll-btn {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                background: rgba(0, 0, 0, 0.6);
+                color: white;
+                border: none;
+                font-size: 24px;
+                padding: 10px;
+                cursor: pointer;
+                border-radius: 50%;
+                z-index: 10;
+            }
+
+            /* Left Scroll Button */
+            .left {
+                left: 20px;
+            }
+
+            /* Right Scroll Button */
+            .right {
+                right: 20px;
+            }
+
+            /* RESPONSIVE DESIGN */
+            @media (max-width: 1200px) {
+                .service-card {
+                    width: 200px;
+                    height: 280px;
+                }
+            }
+
+            @media (max-width: 992px) {
+                .service-card {
+                    width: 180px;
+                    height: 260px;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .service-card {
+                    width: 160px;
+                    height: 250px;
+                }
+            }
+
+            @media (max-width: 576px) {
+                .service-card {
+                    width: 150px;
+                    height: 240px;
+                }
+
+                /* Show only 2 cards */
+                .services-container {
+                    gap: 5px;
+                }
+            }
+
+
+            .text-center{
+                color: black;
+            }
             /* Contact Section (Full Height) */
             .contact {
                 min-height: 100vh;
@@ -216,32 +382,66 @@
         </div>
 
         <!-- Services Section -->
-        <section id="services" class="services">
-            <div id="myCarousel" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-indicators">
-                    <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="0" class="active" aria-label="Slide 1"></button>
-                    <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
-                    <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+        <section id="services" class="services py-5 bg-light">
+            <div class="container position-relative">
+                <h2 class="text-center mb-4">Why Choose Mega City Cabs?</h2>
+                <p class="text-center text-muted mb-4">Experience the best cab service with these top features</p>
+
+                <!-- Scroll Left Button -->
+                <button onclick="scrollLeft()" class="scroll-btn left">❮</button>
+
+                <!-- Scrollable Wrapper -->
+                <div class="scroll-wrapper">
+                    <div class="services-container">
+                        <!-- Vast Range of Vehicles -->
+                        <div class="service-card">
+                            <img src="./images/wideRange.png" alt="Vast Range of Vehicles">
+                            <h5>Vast Range of Vehicles</h5>
+                            <p>Choose from a variety of vehicles to suit your every need.</p>
+                        </div>
+
+                        <!-- Baby Friendly -->
+                        <div class="service-card">
+                            <img src="./images/babySeat.png" alt="Baby Seat">
+                            <h5>Baby Friendly</h5>
+                            <p>Travel safely with your little ones using our secure baby seats.</p>
+                        </div>
+
+                        <!-- Payment Methods -->
+                        <div class="service-card">
+                            <img src="./images/paymentMethods.png" alt="Various Payment Methods">
+                            <h5>Various Payment Methods</h5>
+                            <p>Enjoy hassle-free payments with multiple options including cash, credit/debit cards, and secure online transactions.</p>
+                        </div>
+
+                        <!-- Free Cancellation -->
+                        <div class="service-card">
+                            <img src="./images/cancelFree.png" alt="Free Cancellation">
+                            <h5>Free Cancellation</h5>
+                            <p>Cancel at no cost, anytime you need.</p>
+                        </div>
+
+                        <!-- Name Board -->
+                        <div class="service-card">
+                            <img src="./images/nameBoard.png" alt="Name Board">
+                            <h5>Name Board Service</h5>
+                            <p>Easily spot your ride with our personalized name board service.</p>
+                        </div>
+
+                        <!-- Professional Drivers -->
+                        <div class="service-card">
+                            <img src="./images/profDriver.png" alt="Professional Drivers">
+                            <h5>Professional Drivers</h5>
+                            <p>Travel with confidence knowing that safety is our top priority.</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="carousel-inner">
-                    <div class="carousel-item active">
-                        <img src="./images/service1.jpg" class="d-block w-100" alt="Service 1">
-                    </div>
-                    <div class="carousel-item">
-                        <img src="./images/service2.jpg" class="d-block w-100" alt="Service 2">
-                    </div>
-                    <div class="carousel-item">
-                        <img src="./images/service3.jpg" class="d-block w-100" alt="Service 3">
-                    </div>
-                </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon"></span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon"></span>
-                </button>
+
+                <!-- Scroll Right Button -->
+                <button onclick="scrollRight()" class="scroll-btn right">❯</button>
             </div>
         </section>
+
 
         <!-- Contact Section -->
         <section id="contact" class="contact">
@@ -261,5 +461,48 @@
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+                    const container = document.querySelector(".services-container");
+
+                    function scrollLeft() {
+                        container.scrollBy({left: -250, behavior: "smooth"});
+                    }
+
+                    function scrollRight() {
+                        container.scrollBy({left: 250, behavior: "smooth"});
+                    }
+
+// Enable click and drag scrolling
+                    let isDown = false;
+                    let startX;
+                    let scrollLeftVal;
+
+                    container.addEventListener("mousedown", (e) => {
+                        isDown = true;
+                        container.classList.add("active");
+                        startX = e.pageX - container.offsetLeft;
+                        scrollLeftVal = container.scrollLeft;
+                    });
+
+                    container.addEventListener("mouseleave", () => {
+                        isDown = false;
+                        container.classList.remove("active");
+                    });
+
+                    container.addEventListener("mouseup", () => {
+                        isDown = false;
+                        container.classList.remove("active");
+                    });
+
+                    container.addEventListener("mousemove", (e) => {
+                        if (!isDown)
+                            return;
+                        e.preventDefault();
+                        const x = e.pageX - container.offsetLeft;
+                        const walk = (x - startX) * 2; // Increase multiplier for faster scroll
+                        container.scrollLeft = scrollLeftVal - walk;
+                    });
+
+        </script>
     </body>
 </html>
