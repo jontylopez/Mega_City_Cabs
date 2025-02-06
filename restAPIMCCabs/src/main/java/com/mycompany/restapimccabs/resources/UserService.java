@@ -1,8 +1,8 @@
 package com.mycompany.restapimccabs.resources;
 
 import com.google.gson.Gson;
-import DB.Users;
-import DB.UsersCRUD;
+import User.Users;
+import User.UsersCRUD;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
