@@ -13,86 +13,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Login - Mega City Cabs</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-        <style>
-            body{
-                background: #1a1a2e; /* Dark Navy Blue */
-
-            }
-            /* Center the form with elevation */
-            .form-signin {
-                min-width: 450px;
-                padding: 20px;
-                margin: auto;
-                text-align: center;
-                elevation: 20px;
-                border-radius: 10px;
-                background: rgba(245, 245, 245, 0.95);
-
-                border: 2px solid #ffcc00; /* Gold border to highlight */
-                box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2); /* Subtle shadow for elevation */
-            }
-
-
-
-            /* Custom Button */
-            .btn-custom {
-                background: #ffcc00;
-                color: black;
-                font-weight: bold;
-                border: none;
-                padding: 10px;
-                font-size: 18px;
-                transition: 0.3s;
-                border-radius: 5px;
-            }
-            .btn-custom:hover {
-                background: #ffaa00;
-                color: white;
-                box-shadow: 0px 4px 10px rgba(255, 204, 0, 0.5); /* Glow effect */
-            }
-
-            /* Register Link */
-            .register-link {
-                margin-top: 15px;
-            }
-            .register-link a {
-                color: #ffcc00;
-                text-decoration: none;
-                font-weight: bold;
-                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8); /* Adds a soft black outline */
-            }
-            .register-link a:hover {
-                color: #ffaa00;
-                text-decoration: underline;
-                text-shadow: 2px 2px 5px rgba(0, 0, 0, 1); /* Slightly stronger shadow on hover */
-            }
-            /* Home Link */
-            .home-link {
-                text-align: center;
-                margin-bottom: 20px;
-
-            }
-            .home-link a {
-                color: #ffcc00;
-                font-weight: bold;
-                text-decoration: none;
-                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8); /* Adds a soft black outline */
-                font-size: 16px;
-                border-radius: 15px;
-
-            }
-            .home-link a:hover {
-                color: #ffaa00;
-                text-decoration: underline;
-                text-shadow: 2px 2px 5px rgba(0, 0, 0, 1); /* Slightly stronger shadow on hover */
-            }
-            /* Logo */
-            .form-signin img {
-                width: 80px;
-                height: auto;
-            }
-
-        </style>
+        <link rel="stylesheet" href="./css/login.css">
     </head>
     <body class="d-flex align-items-center vh-100 bg-dark">
 
@@ -170,10 +91,10 @@
                         // ✅ Redirect Based on User Role
                         if (responseData.uRole === "adm") {
                             alert("✅ Login Successful! Redirecting to Admin Dashboard...");
-                            window.location.href = "adminHome.jsp";
+                            window.location.href = "./adminPages/adminHome.jsp";
                         } else if (responseData.uRole === "cus") {
                             alert("✅ Login Successful! Redirecting to Customer Dashboard...");
-                            window.location.href = "customerHome.jsp";
+                            window.location.href = "./customerPages/customerHome.jsp";
                         } else {
                             showMessage("❌ Unauthorized role detected!", "danger");
                         }

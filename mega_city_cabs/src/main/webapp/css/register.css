@@ -1,0 +1,84 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : Feb 6, 2025, 10:50:11 AM
+    Author     : Janith
+*/
+
+  /* Centered Form with Elevation */
+            .form-register {
+                min-width: 500px;
+                padding: 20px;
+                margin: auto;              
+                text-align: center;
+                background: rgba(255, 255, 255, 0.95); /* Light contrast */
+                border-radius: 10px;
+                border: 2px solid #ffcc00; /* Gold border */
+                box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            /* Logo */
+            .form-register img {
+                width: 80px;
+                height: auto;
+            }
+
+            /* Input Fields */
+            .form-control {
+                background: #fff;
+                border: 1px solid #ddd;
+                color: #333;
+            }
+            .form-control:focus {
+                border-color: #ffcc00;
+                box-shadow: 0 0 10px #ffcc00;
+            }
+
+            /* Submit Button */
+            .btn-custom {
+                background: #ffcc00;
+                color: black;
+                font-weight: bold;
+                border: none;
+                padding: 12px;
+                font-size: 18px;
+                transition: 0.3s;
+                border-radius: 5px;
+            }
+            .btn-custom:hover {
+                background: #ffaa00;
+                color: white;
+                box-shadow: 0px 4px 10px rgba(255, 204, 0, 0.5);
+            }
+
+            /* Home Link */
+            .home-link {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .home-link a {
+                color: #ffcc00;
+                font-weight: bold;
+                text-decoration: none;
+                font-size: 16px;
+            }
+            .home-link a:hover {
+                color: #ffaa00;
+                text-decoration: underline;
+            }
+
+            /* Login Link */
+            .login-link {
+                margin-top: 15px;
+            }
+            .login-link a {
+                color: #ffcc00;
+                text-decoration: none;
+                font-weight: bold;
+            }
+            .login-link a:hover {
+                color: #ffaa00;
+                text-decoration: underline;
+            }
