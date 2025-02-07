@@ -11,15 +11,13 @@ import DBConnection.ConnectionHelper;
 
 public class VehiclesCRUD {
     public static int addVehicle(Vehicles vehicle) {
-        String query = "INSERT INTO vehicles (vehiName, typeOf, model, registration_no, price_per_day, image_url) VALUES (?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO vehicles (catId, vehicleNo, regExpDate, stat) VALUES (?, ?, ?, ?)";
         try (Connection conn = ConnectionHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, vehicle.getVehiName());
-            stmt.setString(2, vehicle.getTypeOf());
-            stmt.setString(3, vehicle.getModel());
-            stmt.setString(4, vehicle.getRegistrationNo());
-            stmt.setDouble(5, vehicle.getPricePerDay());
-            stmt.setString(6, vehicle.getImageUrl());
+            stmt.setInt(1, vehicle.getCatId());
+            stmt.setString(2, vehicle.getVehicleNo());
+            stmt.setDate(3, vehicle.getRegExpDate());
+            stmt.setString(4, vehicle.getStat());
             stmt.executeUpdate();
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
@@ -40,13 +38,10 @@ public class VehiclesCRUD {
             while (rs.next()) {
                 vehicles.add(new Vehicles(
                         rs.getInt("id"),
-                        rs.getString("vehiName"),
-                        rs.getString("typeOf"),
-                        rs.getString("model"),
-                        rs.getString("registration_no"),
-                        rs.getDouble("price_per_day"),
-                        rs.getString("image_url"),
-                        rs.getTimestamp("created_at")
+                        rs.getInt("catId"),
+                        rs.getString("vehicleNo"),
+                        rs.getDate("regExpDate"),
+                        rs.getString("stat")
                 ));
             }
         } catch (SQLException e) {
@@ -56,16 +51,14 @@ public class VehiclesCRUD {
     }
 
     public static int updateVehicle(Vehicles vehicle) {
-        String query = "UPDATE vehicles SET vehiName=?, typeOf=?, model=?, registration_no=?, price_per_day=?, image_url=? WHERE id=?";
+        String query = "UPDATE vehicles SET catId=?, vehicleNo=?, regExpDate=?, stat=? WHERE id=?";
         try (Connection conn = ConnectionHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, vehicle.getVehiName());
-            stmt.setString(2, vehicle.getTypeOf());
-            stmt.setString(3, vehicle.getModel());
-            stmt.setString(4, vehicle.getRegistrationNo());
-            stmt.setDouble(5, vehicle.getPricePerDay());
-            stmt.setString(6, vehicle.getImageUrl());
-            stmt.setInt(7, vehicle.getId());
+            stmt.setInt(1, vehicle.getCatId());
+            stmt.setString(2, vehicle.getVehicleNo());
+            stmt.setDate(3, vehicle.getRegExpDate());
+            stmt.setString(4, vehicle.getStat());
+            stmt.setInt(5, vehicle.getId());
             return stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -85,4 +78,3 @@ public class VehiclesCRUD {
         return -1;
     }
 }
-

@@ -41,6 +41,6 @@
     function logout() {
         sessionStorage.clear();
         alert("Logged out successfully!");
-        window.location.replace("login.jsp");
+        window.location.replace("../login.jsp");
     }
 </script>

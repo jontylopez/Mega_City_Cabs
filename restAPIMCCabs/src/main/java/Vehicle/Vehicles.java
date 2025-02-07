@@ -4,35 +4,25 @@
  */
 package Vehicle;
 
-import java.sql.Timestamp;
+import java.sql.Date;
 
-/**
- *
- * @author Janith
- */
 public class Vehicles {
 
     private int id;
-    private String vehiName;
-    private String typeOf;
-    private String model;
-    private String registrationNo;
-    private double pricePerDay;
-    private String imageUrl;
-    private Timestamp createdAt;
+    private int catId;
+    private String vehicleNo;
+    private Date regExpDate;
+    private String stat;
 
     public Vehicles() {
     }
 
-    public Vehicles(int id, String vehiName, String typeOf, String model, String registrationNo, double pricePerDay, String imageUrl, Timestamp createdAt) {
+    public Vehicles(int id, int catId, String vehicleNo, Date regExpDate, String stat) {
         this.id = id;
-        this.vehiName = vehiName;
-        this.typeOf = typeOf;
-        this.model = model;
-        this.registrationNo = registrationNo;
-        this.pricePerDay = pricePerDay;
-        this.imageUrl = imageUrl;
-        this.createdAt = createdAt;
+        this.catId = catId;
+        this.vehicleNo = vehicleNo;
+        this.regExpDate = regExpDate;
+        this.stat = stat;
     }
 
     // Getters and Setters
@@ -44,59 +34,35 @@ public class Vehicles {
         this.id = id;
     }
 
-    public String getVehiName() {
-        return vehiName;
+    public int getCatId() {
+        return catId;
     }
 
-    public void setVehiName(String vehiName) {
-        this.vehiName = vehiName;
+    public void setCatId(int catId) {
+        this.catId = catId;
     }
 
-    public String getTypeOf() {
-        return typeOf;
+    public String getVehicleNo() {
+        return vehicleNo;
     }
 
-    public void setTypeOf(String typeOf) {
-        this.typeOf = typeOf;
+    public void setVehicleNo(String vehicleNo) {
+        this.vehicleNo = vehicleNo;
     }
 
-    public String getModel() {
-        return model;
+    public Date getRegExpDate() {
+        return regExpDate;
     }
 
-    public void setModel(String model) {
-        this.model = model;
+    public void setRegExpDate(Date regExpDate) {
+        this.regExpDate = regExpDate;
     }
 
-    public String getRegistrationNo() {
-        return registrationNo;
+    public String getStat() {
+        return stat;
     }
 
-    public void setRegistrationNo(String registrationNo) {
-        this.registrationNo = registrationNo;
-    }
-
-    public double getPricePerDay() {
-        return pricePerDay;
-    }
-
-    public void setPricePerDay(double pricePerDay) {
-        this.pricePerDay = pricePerDay;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
+    public void setStat(String stat) {
+        this.stat = stat;
     }
 }

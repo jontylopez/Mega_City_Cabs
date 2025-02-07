@@ -8,12 +8,81 @@
 <%@ include file="../sessionCheck.jsp" %>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Customer Dashboard | Mega City Cabs</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="../css/customerHome.css">
     </head>
     <body>
-        <h1>Hello customer!</h1>
+
+        <!-- Sidebar -->
+        <div class="sidebar d-flex flex-column flex-shrink-0 p-3">
+            <a href="customerHome.jsp" class="d-flex align-items-center mb-3 text-white text-decoration-none">
+                <i class="bi bi-speedometer2 me-2"></i>
+                <span class="fs-4">Customer Panel</span>
+            </a>
+            <hr>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li><a href="customerDash.jsp" class="nav-link text-white"><i class="bi bi-house-door me-2"></i> Home</a></li>
+                <li><a href="bookRide.jsp" class="nav-link text-white"><i class="bi bi-car-front me-2"></i> Book a Ride</a></li>
+                <li><a href="bookingHistory.jsp" class="nav-link text-white"><i class="bi bi-clock-history me-2"></i> Booking History</a></li>
+            </ul>
+            <hr>
+            <div class="dropdown">
+                <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+                    <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+                    <strong id="userText">User</strong>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+                    <li><a class="dropdown-item profile-link" href="../userPages/profile.jsp">Profile</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" onclick="logout()">Sign out</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content"></div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                loadPage("customerDash.jsp"); // Load customer dashboard by default
+
+                function setupLinks() {
+                    document.querySelectorAll(".sidebar .nav-link, .profile-link").forEach(link => {
+                        link.replaceWith(link.cloneNode(true)); // Remove duplicate event listeners
+                    });
+
+                    document.querySelectorAll(".sidebar .nav-link, .profile-link").forEach(link => {
+                        link.addEventListener("click", function (e) {
+                            e.preventDefault();
+                            let pageUrl = this.getAttribute("href");
+                            if (pageUrl !== "#") {
+                                loadPage(pageUrl);
+                            }
+                        });
+                    });
+                }
+
+                function loadPage(url) {
+                    fetch(url)
+                        .then(response => response.text())
+                        .then(html => {
+                            document.querySelector(".main-content").innerHTML = html;
+                            setupLinks();
+                        })
+                        .catch(error => console.error("Error loading page:", error));
+                }
+
+                setupLinks();
+            });
+        </script>
+
     </body>
 </html>
+

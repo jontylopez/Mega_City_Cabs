@@ -31,6 +31,10 @@
                         <i class="bi bi-calendar-week me-2"></i> Booking Manager</a>
                 </li>
                 <li>
+                    <a href="categoryManager.jsp" class="nav-link text-white">
+                        <i class="bi bi-tags me-2"></i> Category Manager</a>
+                </li>
+                <li>
                     <a href="vehicleManager.jsp" class="nav-link text-white">
                         <i class="bi bi-car-front me-2"></i> Vehicle Manager</a>
                 </li>

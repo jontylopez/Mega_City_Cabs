@@ -4,12 +4,9 @@
  */
 package User;
 
-/**
- *
- * @author Janith
- */
 public class Users {
-     private int id;
+
+    private int id;
     private String username;
     private String pWord;
     private String uRole;
@@ -17,22 +14,24 @@ public class Users {
     private String address;
     private String phone;
     private String email;
+    private String profilePic;
 
     public Users() {
     }
 
-    public Users(int id, String username, String password, String uRole, String name, String address, String phone, String email) {
+    public Users(int id, String username, String pWord, String uRole, String fullName, String address, String phone, String email, String profilePic) {
         this.id = id;
         this.username = username;
-        this.pWord = password;
+        this.pWord = pWord;
         this.uRole = uRole;
-        this.fullName = name;
+        this.fullName = fullName;
         this.address = address;
         this.phone = phone;
         this.email = email;
+        this.profilePic = profilePic;
     }
 
-    // ✅ Getters & Setters
+    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -53,7 +52,7 @@ public class Users {
         return pWord;
     }
 
-    public void setpWordord(String pWord) {
+    public void setpWord(String pWord) {
         this.pWord = pWord;
     }
 
@@ -65,11 +64,11 @@ public class Users {
         this.uRole = uRole;
     }
 
-    public String getfullName() {
+    public String getFullName() {
         return fullName;
     }
 
-    public void setfullName(String fullName) {
+    public void setFullName(String fullName) {
         this.fullName = fullName;
     }
 
@@ -95,5 +94,13 @@ public class Users {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getProfilePic() {
+        return profilePic;
+    }
+
+    public void setProfilePic(String profilePic) {
+        this.profilePic = profilePic;
     }
 }
