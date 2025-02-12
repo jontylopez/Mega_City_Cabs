@@ -1,17 +1,17 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Vehicle;
 
 import java.sql.Date;
+import com.google.gson.annotations.JsonAdapter;
 
 public class Vehicles {
 
     private int id;
     private int catId;
     private String vehicleNo;
+
+    @JsonAdapter(SqlDateAdapter.class) // ✅ Still applies the custom adapter
     private Date regExpDate;
+
     private String stat;
 
     public Vehicles() {
