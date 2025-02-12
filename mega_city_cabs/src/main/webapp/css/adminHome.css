@@ -76,3 +76,13 @@ body {
         display: block;
     }
 }
+@media (max-width: 768px) {
+    .sidebar {
+        width: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+    .main-content {
+        margin-left: 0 !important;
+    }
+}

@@ -1,14 +1,12 @@
 document.addEventListener("DOMContentLoaded", function () {
     console.log("📌 Admin Dashboard Loaded!");
-    
+
     // Load default admin dashboard
     loadPage("adminDash.jsp");
 
     // Attach event listeners
     setupLinks();
 });
-
-
 
 let currentPage = ""; // ✅ Track the currently loaded page
 
@@ -29,31 +27,50 @@ function loadPage(url) {
 
             console.log("✅ Page Loaded: ", url);
 
-            // ✅ Fetch Categories when Category Manager or Vehicle Manager is loaded
-            if (url.includes("categoryManager.jsp") || url.includes("vehicleManager.jsp")) {
-                console.log("📌 Fetching categories...");
-                getCategories();
+            if (url.includes("categoryManager.jsp")) {
+                console.log("📌 Category Manager Loaded! Fetching categories...");
+                
+                // ✅ Fetch categories & update table
+                updateCategoryTable();
+
+                // ✅ Ensure Category Form works
+                setTimeout(() => {
+                    const categoryForm = document.getElementById("categoryForm");
+                    if (categoryForm) {
+                        categoryForm.addEventListener("submit", function (event) {
+                            event.preventDefault();
+                            createCategory();
+                        });
+                    }
+                }, 300);
             }
 
-            // ✅ Fetch Vehicles when Vehicle Manager is loaded
             if (url.includes("vehicleManager.jsp")) {
                 console.log("📌 Vehicle Manager Loaded! Fetching vehicles...");
-                getVehicles();
+                
+                // ✅ Fetch vehicles & update table
+                updateVehicleTable();
 
-                // ✅ Attach Event Listener for the Form AFTER loading the page
-                const vehicleForm = document.getElementById("vehicleForm");
-                if (vehicleForm) {
-                    vehicleForm.addEventListener("submit", function (event) {
-                        event.preventDefault(); // ✅ Prevent page refresh
-                        createVehicle(event);
-                    });
-                }
+                // ✅ Populate dropdowns AFTER page loads
+                setTimeout(() => {
+                    console.log("📌 Populating Vehicle Category Dropdowns...");
+                    updateCategoryDropdowns();
+                }, 300);
+
+                // ✅ Ensure Vehicle Form works
+                setTimeout(() => {
+                    const vehicleForm = document.getElementById("vehicleForm");
+                    if (vehicleForm) {
+                        vehicleForm.addEventListener("submit", function (event) {
+                            event.preventDefault();
+                            createVehicle();
+                        });
+                    }
+                }, 300);
             }
         })
         .catch(error => console.error("❌ Error loading page:", error));
 }
-
-
 
 // 🔹 Setup Click Event for Sidebar Links
 function setupLinks() {
@@ -73,66 +90,64 @@ function setupLinks() {
 // ==========================================
 const categoryApiUrl = "http://localhost:8080/restAPIMCCabs/api/categories";
 
-// 🔹 Fetch and Display Categories
+// 🔹 Fetch Categories Data
 async function getCategories() {
     console.log("📌 Fetching categories...");
+
     try {
         const response = await fetch(categoryApiUrl);
-        if (!response.ok) throw new Error("HTTP Error " + response.status);
+        if (!response.ok) throw new Error(`❌ HTTP Error: ${response.status}`);
 
         const categories = await response.json();
         console.log("✅ API Response Data:", categories);
-
-        // ✅ Update category table if available
-        const tableBody = document.getElementById("categoryTableBody");
-        if (tableBody) {
-            tableBody.innerHTML = ""; // Clear table before inserting new data
-            categories.forEach(category => {
-                const row = `
-                <tr>
-                    <td>${category.id}</td>
-                    <td>${category.catName}</td>
-                    <td>${category.maxPsngr}</td>
-                    <td>${category.perDayValue}</td>
-                    <td>${category.maxKmPerDay}</td>
-                    <td>${category.milePkg1}</td>
-                    <td>${category.milePkg2}</td>
-                    <td>${category.waitingPerHr}</td>
-                    <td>${category.extraKm}</td>
-                    <td>${category.active}</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm" onclick="editCategory(${category.id}, '${category.catName}', ${category.maxPsngr}, ${category.perDayValue}, ${category.maxKmPerDay}, ${category.milePkg1}, ${category.milePkg2}, ${category.waitingPerHr}, ${category.extraKm}, '${category.active}')"><i class="bi bi-pencil"></i></button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteCategory(${category.id})"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>`;
-                tableBody.innerHTML += row;
-            });
-            console.log("✅ Category Table Updated!");
-        }
-
-        // ✅ Update category dropdowns if available
-        const categoryDropdown = document.getElementById("vehicleCategory");
-        const updateCategoryDropdown = document.getElementById("updateVehicleCategory");
-
-        if (categoryDropdown || updateCategoryDropdown) {
-            console.log("📌 Populating category dropdowns...");
-            const options = categories.map(cat => `<option value="${cat.id}">${cat.catName}</option>`).join("");
-
-            if (categoryDropdown) categoryDropdown.innerHTML = options;
-            if (updateCategoryDropdown) updateCategoryDropdown.innerHTML = options;
-
-            console.log("✅ Category Dropdowns Updated!");
-        }
-
+        return categories; // ✅ Return data for other functions to use
     } catch (error) {
         console.error("🚨 Fetch Error:", error);
+        return []; // ✅ Return empty array if fetch fails
     }
 }
 
-// 🔹 Create a New Category
-async function createCategory(event) {
-    event.preventDefault();
+// 🔹 Update Category Table with Data
+async function updateCategoryTable() {
+    const categories = await getCategories(); // Fetch categories
 
+    const tableBody = document.getElementById("categoryTableBody");
+    if (!tableBody) {
+        console.error("❌ categoryTableBody not found!");
+        return;
+    }
+
+    tableBody.innerHTML = ""; // ✅ Clear table
+
+    categories.forEach(category => {
+        const row = `
+        <tr>
+            <td>${category.id}</td>
+            <td>${category.catName}</td>
+            <td>${category.maxPsngr}</td>
+            <td>${category.perDayValue}</td>
+            <td>${category.maxKmPerDay}</td>
+            <td>${category.milePkg1}</td>
+            <td>${category.milePkg2}</td>
+            <td>${category.waitingPerHr}</td>
+            <td>${category.extraKm}</td>
+            <td><span class="badge bg-${category.active === "Active" ? "success" : "danger"}">${category.active}</span></td>
+            <td>
+                <button class="btn btn-warning btn-sm" onclick="editCategory(${category.id}, '${category.catName}', ${category.maxPsngr}, ${category.perDayValue}, ${category.maxKmPerDay}, ${category.milePkg1}, ${category.milePkg2}, ${category.waitingPerHr}, ${category.extraKm}, '${category.active}')"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-danger btn-sm" onclick="deleteCategory(${category.id})"><i class="bi bi-trash"></i></button>
+            </td>
+        </tr>`;
+        tableBody.innerHTML += row;
+    });
+
+    console.log("✅ Category Table Updated!");
+    
+}
+
+
+
+// 🔹 Create a New Category
+async function createCategory() {
     const category = {
         catName: document.getElementById("catName").value,
         maxPsngr: parseInt(document.getElementById("maxPsngr").value),
@@ -158,7 +173,8 @@ async function createCategory(event) {
         console.log("✅ API Response:", responseData);
 
         if (response.ok) {
-            getCategories(); // Refresh list
+            alert("✅ Created");
+            updateCategoryTable(); // Refresh list
             document.getElementById("categoryForm").reset();
         } else {
             console.error("❌ Insert Failed:", responseData);
@@ -224,8 +240,10 @@ async function submitUpdate(event = null) {
         console.log("📌 API Response:", responseData);
 
         if (response.ok) {
-            getCategories();
+            alert("✅ Updated");
+            updateCategoryTable();
             cancelUpdate();
+            
         } else {
             console.error("❌ Update Failed:", responseData);
         }
@@ -249,7 +267,8 @@ async function deleteCategory(id) {
             });
 
             if (response.ok) {
-                getCategories(); // ✅ Refresh the list dynamically
+               alert("✅ Deleted");
+               updateCategoryTable(); // ✅ Refresh the list dynamically
             } else {
                 console.error("❌ Delete Failed");
             }
@@ -292,85 +311,89 @@ function formatDate(dateString) {
     return date.toISOString().split("T")[0]; 
 }
 
-/**
- * ✅ Fetch and Display Vehicles
- */
+// 🔹 Fetch Vehicle Data
 async function getVehicles() {
     console.log("📌 Fetching vehicles...");
-
+    
     try {
         const response = await fetch(vehicleApiUrl);
         if (!response.ok) throw new Error(`❌ HTTP Error: ${response.status}`);
 
         const vehicles = await response.json();
         console.log("✅ API Response Data:", vehicles);
-
-        const tableBody = document.getElementById("vehicleTableBody");
-        if (!tableBody) {
-            console.error("❌ vehicleTableBody not found!");
-            return;
-        }
-
-        tableBody.innerHTML = ""; // Clear table before inserting new data
-        vehicles.forEach(vehicle => {
-            const row = `
-            <tr>
-                <td>${vehicle.id}</td>
-                <td>${vehicle.catId}</td>
-                <td>${vehicle.vehicleNo}</td>
-                <td>${vehicle.regExpDate}</td>
-                <td><span class="badge bg-${vehicle.stat === "Active" ? "success" : "danger"}">${vehicle.stat}</span></td>
-                <td>
-                    <button class="btn btn-warning btn-sm" onclick="editVehicle(${vehicle.id}, ${vehicle.catId}, '${vehicle.vehicleNo}', '${vehicle.regExpDate}', '${vehicle.stat}')"><i class="bi bi-pencil"></i></button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteVehicle(${vehicle.id})"><i class="bi bi-trash"></i></button>
-                </td>
-            </tr>`;
-            tableBody.innerHTML += row;
-        });
-
-        console.log("✅ Vehicle Table Updated!");
+        return vehicles; // ✅ Return the fetched data
     } catch (error) {
         console.error("🚨 Fetch Error:", error);
+        return []; // ✅ Return empty array if fetching fails
     }
 }
+
+// 🔹 Update Vehicle Table with Category Names
+async function updateVehicleTable() {
+    const vehicles = await getVehicles(); // Fetch vehicle data
+    const categories = await getCategories(); // Fetch category data
+
+    const tableBody = document.getElementById("vehicleTableBody");
+    if (!tableBody) {
+        console.error("❌ vehicleTableBody not found!");
+        return;
+    }
+
+    tableBody.innerHTML = ""; // ✅ Clear table before inserting new data
+
+    vehicles.forEach(vehicle => {
+        // 🔹 Find the matching category name
+        const category = categories.find(cat => cat.id === vehicle.catId);
+        const categoryName = category ? category.catName : "Unknown"; // Default to "Unknown" if not found
+
+        const row = `
+        <tr>
+            <td>${vehicle.id}</td>
+            <td>${categoryName}</td> <!-- ✅ Display category name instead of ID -->
+            <td>${vehicle.vehicleNo}</td>
+            <td>${vehicle.regExpDate}</td>
+            <td><span class="badge bg-${vehicle.stat === "Active" ? "success" : "danger"}">${vehicle.stat}</span></td>
+            <td>
+                <button class="btn btn-warning btn-sm" onclick="editVehicle(${vehicle.id}, ${vehicle.catId}, '${vehicle.vehicleNo}', '${vehicle.regExpDate}', '${vehicle.stat}')"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-danger btn-sm" onclick="deleteVehicle(${vehicle.id})"><i class="bi bi-trash"></i></button>
+            </td>
+        </tr>`;
+        tableBody.innerHTML += row;
+    });
+
+    console.log("✅ Vehicle Table Updated with Category Names!");
+}
+
 
 /**
  * ✅ Create a New Vehicle
  */
 // 🔹 Fetch and Display Categories (for Add & Update Vehicle Forms)
-async function getCategories() {
-    console.log("📌 Fetching categories...");
-    try {
-        const response = await fetch(categoryApiUrl);
-        if (!response.ok) throw new Error("HTTP Error " + response.status);
 
-        const categories = await response.json();
-        console.log("✅ API Response Data:", categories);
 
-        // ✅ Populate both Add & Update dropdowns
-        populateDropdown("vehicleCategory", categories);
-        populateDropdown("updateVehicleCategory", categories);
+// 🔹 Update Category Dropdowns
+// 🔹 Update Category Dropdowns
+async function updateCategoryDropdowns() {
+    const categories = await getCategories(); // Fetch categories
 
-        console.log("✅ Category Dropdowns Updated!");
-    } catch (error) {
-        console.error("🚨 Fetch Error:", error);
-    }
+    populateDropdown("vehicleCategory", categories);
+    populateDropdown("updateVehicleCategory", categories);
+
+    console.log("✅ Category Dropdowns Updated!");
 }
 
 // 🔹 Helper Function to Populate Dropdowns
 function populateDropdown(dropdownId, categories) {
     const dropdown = document.getElementById(dropdownId);
-    if (!dropdown) return; // ✅ Exit if dropdown not found
+    if (!dropdown) return;
 
-    dropdown.innerHTML = ""; // ✅ Clear previous options
-    dropdown.innerHTML += `<option value="" disabled selected>Select a Category</option>`; // Default Option
+    dropdown.innerHTML = `<option value="" disabled selected>Select a Category</option>`;
 
     categories.forEach(category => {
         let option = `<option value="${category.id}">${category.catName}</option>`;
         dropdown.innerHTML += option;
     });
 }
-
 
 async function createVehicle(event) {
     if (event) event.preventDefault();
@@ -403,7 +426,7 @@ async function createVehicle(event) {
         }
 
         alert("✅ Vehicle created successfully!");
-        getVehicles(); // Refresh list
+        updateVehicleTable(); // Refresh list
         document.getElementById("vehicleForm").reset();
     } catch (error) {
         console.error("🚨 Error adding vehicle:", error);
@@ -463,8 +486,8 @@ async function submitVehicleUpdate(event) {
 
         const responseData = await response.json();
         console.log("✅ API Response:", responseData);
-
-        getVehicles();
+        alert("✅ Updated");
+        updateVehicleTable();
         cancelVehicleUpdate();
     } catch (error) {
         console.error("🚨 Fetch Error:", error);
@@ -489,8 +512,8 @@ async function deleteVehicle(id) {
             });
 
             if (!response.ok) throw new Error(`❌ HTTP Error: ${response.status}`);
-
-            getVehicles(); // Refresh vehicle list
+            alert("✅ Deleted");
+            updateVehicleTable(); // Refresh vehicle list
         } catch (error) {
             console.error("🚨 Fetch Error:", error);
         }
@@ -500,6 +523,6 @@ async function deleteVehicle(id) {
 // ✅ Ensure vehicles load on page load
 document.addEventListener("DOMContentLoaded", function () {
     if (window.location.href.includes("vehicleManager.jsp")) {
-        getVehicles();
+       updateVehicleTable();
     }
 });
