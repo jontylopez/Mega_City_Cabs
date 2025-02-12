@@ -7,12 +7,13 @@ import java.util.List;
 import DBConnection.ConnectionHelper;
 
 public class CategoryCRUD {
-    
+
+    // 🔹 Add a New Category
     public static int addCategory(Category category) {
         String query = "INSERT INTO category (catName, maxPsngr, perDayValue, maxKmPerDay, milePkg1, milePkg2, waitingPerHr, extraKm, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectionHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-            
+
             stmt.setString(1, category.getCatName());
             stmt.setInt(2, category.getMaxPsngr());
             stmt.setBigDecimal(3, category.getPerDayValue());
@@ -34,13 +35,14 @@ public class CategoryCRUD {
         return -1;
     }
 
+    // 🔹 Retrieve All Categories
     public static List<Category> getCategories() {
         List<Category> categories = new ArrayList<>();
         String query = "SELECT * FROM category";
         try (Connection conn = ConnectionHelper.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
-            
+
             while (rs.next()) {
                 categories.add(new Category(
                         rs.getInt("id"),
@@ -61,11 +63,12 @@ public class CategoryCRUD {
         return categories;
     }
 
+    // 🔹 Update a Category
     public static int updateCategory(Category category) {
         String query = "UPDATE category SET catName=?, maxPsngr=?, perDayValue=?, maxKmPerDay=?, milePkg1=?, milePkg2=?, waitingPerHr=?, extraKm=?, active=? WHERE id=?";
         try (Connection conn = ConnectionHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
-            
+
             stmt.setString(1, category.getCatName());
             stmt.setInt(2, category.getMaxPsngr());
             stmt.setBigDecimal(3, category.getPerDayValue());
@@ -81,9 +84,10 @@ public class CategoryCRUD {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return -1;
+        return 0;
     }
 
+    // 🔹 Delete a Category
     public static int deleteCategory(int id) {
         String query = "DELETE FROM category WHERE id=?";
         try (Connection conn = ConnectionHelper.getConnection();

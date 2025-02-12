@@ -72,43 +72,8 @@
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-                        document.addEventListener("DOMContentLoaded", function () {
-                            loadPage("adminDash.jsp"); // Load dashboard by default
+        <script src="../js/admin.js" defer></script>
 
-                            function setupLinks() {
-                                // Remove existing event listeners
-                                document.querySelectorAll(".sidebar .nav-link, .profile-link").forEach(link => {
-                                    link.replaceWith(link.cloneNode(true)); // Clone and replace elements to remove previous event listeners
-                                });
-
-                                // Re-add event listeners
-                                document.querySelectorAll(".sidebar .nav-link, .profile-link").forEach(link => {
-                                    link.addEventListener("click", function (e) {
-                                        e.preventDefault(); // Prevent default behavior
-
-                                        let pageUrl = this.getAttribute("href"); // Get the page URL
-
-                                        if (pageUrl !== "#") {
-                                            loadPage(pageUrl);
-                                        }
-                                    });
-                                });
-                            }
-
-                            function loadPage(url) {
-                                fetch(url)
-                                        .then(response => response.text())
-                                        .then(html => {
-                                            document.querySelector(".main-content").innerHTML = html; // Load content dynamically
-                                            setupLinks(); // Reinitialize event listeners for dynamically loaded content
-                                        })
-                                        .catch(error => console.error("Error loading page:", error));
-                            }
-
-                            setupLinks(); // Initialize event listeners on page load
-                        });
-        </script>
 
 
     </body>

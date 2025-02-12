@@ -17,7 +17,7 @@
 
         <!-- Add Category Form -->
         <div class="card mb-4 shadow-sm">
-            <div class="card-header text-blqck" style="background-color: gold;">Add New Category</div>
+            <div class="card-header bg-warning text-dark">Add New Category</div>
             <div class="card-body">
                 <form id="categoryForm">
                     <div class="row">
@@ -78,90 +78,72 @@
                             <th>Max Passengers</th>
                             <th>Per Day</th>
                             <th>Max Km/Day</th>
+                            <th>Mile Pkg 1</th>
+                            <th>Mile Pkg 2</th>
+                            <th>Waiting Per Hr</th>
                             <th>Extra Km</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="categoryTableBody">
-                        <!-- Dynamic Data Will Be Loaded Here -->
+                        <!-- Categories will be dynamically inserted here -->
                     </tbody>
                 </table>
             </div>
         </div>
+        
+        <!-- Update Category Form -->
+<div class="card mb-4 shadow-sm" id="updateForm" style="display: none;">
+    <div class="card-header bg-primary text-white">Edit Category</div>
+    <div class="card-body">
+        <input type="hidden" id="updateCategoryId">
+        <div class="mb-3">
+            <label class="form-label">Category Name</label>
+            <input type="text" class="form-control" id="updateCatName">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Max Passengers</label>
+            <input type="number" class="form-control" id="updateMaxPsngr">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Per Day Value</label>
+            <input type="number" class="form-control" id="updatePerDayValue" step="0.01">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Max Km Per Day</label>
+            <input type="number" class="form-control" id="updateMaxKmPerDay">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Mile Package 1</label>
+            <input type="number" class="form-control" id="updateMilePkg1" step="0.01">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Mile Package 2</label>
+            <input type="number" class="form-control" id="updateMilePkg2" step="0.01">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Waiting Per Hour</label>
+            <input type="number" class="form-control" id="updateWaitingPerHr" step="0.01">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Extra Km Charge</label>
+            <input type="number" class="form-control" id="updateExtraKm" step="0.01">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Status</label>
+            <select class="form-control" id="updateActive">
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" onclick="submitUpdate()">Update Category</button>
+        <button class="btn btn-secondary" onclick="cancelUpdate()">Cancel</button>
+    </div>
+</div>
+
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            fetchCategories();
-
-            document.getElementById("categoryForm").addEventListener("submit", function (e) {
-                e.preventDefault();
-                let formData = {
-                    catName: document.getElementById("catName").value,
-                    maxPsngr: document.getElementById("maxPsngr").value,
-                    perDayValue: document.getElementById("perDayValue").value,
-                    maxKmPerDay: document.getElementById("maxKmPerDay").value,
-                    milePkg1: document.getElementById("milePkg1").value,
-                    milePkg2: document.getElementById("milePkg2").value,
-                    waitingPerHr: document.getElementById("waitingPerHr").value,
-                    extraKm: document.getElementById("extraKm").value,
-                    active: document.getElementById("active").value
-                };
-
-                fetch("http://localhost:8080/restAPIMCCabs/api/categories/create", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(formData)
-                })
-                .then(response => response.json())
-                .then(() => {
-                    fetchCategories();
-                    document.getElementById("categoryForm").reset();
-                })
-                .catch(error => console.error("Error:", error));
-            });
-
-            function fetchCategories() {
-                fetch("http://localhost:8080/restAPIMCCabs/api/categories")
-                .then(response => response.json())
-                .then(data => {
-                    let tableBody = document.getElementById("categoryTableBody");
-                    tableBody.innerHTML = "";
-                    data.forEach(category => {
-                        let row = `
-                            <tr>
-                                <td>${category.id}</td>
-                                <td>${category.catName}</td>
-                                <td>${category.maxPsngr}</td>
-                                <td>${category.perDayValue}</td>
-                                <td>${category.maxKmPerDay}</td>
-                                <td>${category.extraKm}</td>
-                                <td><span class="badge bg-" + (category.active === "Active" ? "success" : "danger") + '">' + category.active + '</span></td>
-                                <td>
-                                    <button class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i></button>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteCategory(${category.id})"><i class="bi bi-trash"></i></button>
-                                </td>
-                            </tr>`;
-                        tableBody.innerHTML += row;
-                    });
-                })
-                .catch(error => console.error("Error fetching categories:", error));
-            }
-
-            function deleteCategory(id) {
-                if (confirm("Are you sure you want to delete this category?")) {
-                    fetch(`http://localhost:8080/restAPIMCCabs/api/categories/${id}`, {
-                        method: "DELETE"
-                    })
-                    .then(response => response.json())
-                    .then(() => fetchCategories())
-                    .catch(error => console.error("Error deleting category:", error));
-                }
-            }
-        });
-    </script>
-
+    <script src="../js/admin.js"></script>
 </body>
 </html>

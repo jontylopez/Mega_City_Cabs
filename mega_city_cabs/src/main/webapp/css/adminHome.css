@@ -1,38 +1,78 @@
-/*
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
-*/
-/* 
-    Created on : Feb 6, 2025, 10:50:54 AM
-    Author     : Janith
-*/
- body {
-            min-height: 100vh;
-            display: flex;
-        }
-        .sidebar {
-            width: 280px;
-            height: 100vh;
-            background-color: #343a40; /* Dark background */
-            color: white;
-            padding: 15px;
-        }
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-        }
-        .sidebar .nav-link:hover {
-            background-color: #495057;
-        }
-        .main-content {
-            flex-grow: 1;
-            padding: 20px;
-            background: #f8f9fa;
-        }
-        .dashboard-card {
-            border-left: 4px solid #ffcc00;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        }
+/* Ensure full height layout */
+body {
+    display: flex;
+    min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden; /* Prevents horizontal scroll */
+}
+
+/* Sidebar Styling */
+.sidebar {
+    width: 280px;
+    background-color: #343a40;
+    color: white;
+    padding: 15px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    overflow-y: auto;
+    transition: width 0.3s ease-in-out;
+}
+
+/* Sidebar Links */
+.sidebar a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    padding: 10px;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #495057;
+}
+
+/* Main Content - Adjust to Sidebar */
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    background: #f8f9fa;
+    min-height: 100vh; /* Matches sidebar height */
+    overflow-y: auto; /* Allows scrolling within */
+    box-sizing: border-box;
+    width: calc(100% - 280px); /* Adjusts based on sidebar */
+    margin-left: 280px;
+    transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background: #343a40;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    display: none;
+    z-index: 1000;
+}
+
+/* Responsive Sidebar & Content Fix */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+    
+    .main-content {
+        width: 100%; /* Takes full width when sidebar is hidden */
+        margin-left: 0;
+    }
+    
+    .sidebar-toggle {
+        display: block;
+    }
+}

@@ -8,27 +8,49 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 
 @Path("categories")
 public class CategoryService {
+
     private final CategoryCRUD categoryCRUD = new CategoryCRUD();
     private final Gson gson = new Gson();
 
-    @POST
-    @Path("/create")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response addCategory(String json) {
+   @POST
+@Path("/create")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+public Response addCategory(String json) {
+    System.out.println("📩 Incoming API Request: " + json);
+    
+    try {
         Category category = gson.fromJson(json, Category.class);
         int categoryId = categoryCRUD.addCategory(category);
-        return categoryId > 0 ? Response.status(Response.Status.CREATED)
-                .entity("{\"message\": \"Category created successfully\", \"categoryId\": " + categoryId + "}")
-                .build()
-                : Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity("{\"message\": \"Failed to create category\"}")
+
+        if (categoryId > 0) {
+            System.out.println("✅ Category Created: ID = " + categoryId);
+            return Response.status(Response.Status.CREATED)
+                    .header("Access-Control-Allow-Origin", "*")  // Allow requests from any origin
+                    .header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT")
+                    .header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+                    .entity("{\"message\": \"Category created successfully\", \"categoryId\": " + categoryId + "}")
+                    .build();
+        } else {
+            System.out.println("❌ Insert Failed");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .header("Access-Control-Allow-Origin", "*")
+                    .entity("{\"message\": \"Failed to create category\"}")
+                    .build();
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .header("Access-Control-Allow-Origin", "*")
+                .entity("{\"message\": \"Server error\", \"error\": \"" + e.getMessage() + "\"}")
                 .build();
     }
-
+}
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
