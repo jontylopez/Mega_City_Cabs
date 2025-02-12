@@ -49,39 +49,7 @@
         <div class="main-content"></div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                loadPage("customerDash.jsp"); // Load customer dashboard by default
-
-                function setupLinks() {
-                    document.querySelectorAll(".sidebar .nav-link, .profile-link").forEach(link => {
-                        link.replaceWith(link.cloneNode(true)); // Remove duplicate event listeners
-                    });
-
-                    document.querySelectorAll(".sidebar .nav-link, .profile-link").forEach(link => {
-                        link.addEventListener("click", function (e) {
-                            e.preventDefault();
-                            let pageUrl = this.getAttribute("href");
-                            if (pageUrl !== "#") {
-                                loadPage(pageUrl);
-                            }
-                        });
-                    });
-                }
-
-                function loadPage(url) {
-                    fetch(url)
-                        .then(response => response.text())
-                        .then(html => {
-                            document.querySelector(".main-content").innerHTML = html;
-                            setupLinks();
-                        })
-                        .catch(error => console.error("Error loading page:", error));
-                }
-
-                setupLinks();
-            });
-        </script>
+        <script src="../js/customer.js" defer></script>
 
     </body>
 </html>

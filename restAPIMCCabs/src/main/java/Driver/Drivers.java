@@ -1,14 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Driver;
 
-/**
- *
- * @author Janith
- */
+import DateAdapter.SqlDateAdapter;
 import java.sql.Date;
+import com.google.gson.annotations.JsonAdapter;
 
 public class Drivers {
 
@@ -17,7 +11,10 @@ public class Drivers {
     private String dAddress;
     private String dTel;
     private String dLNum;
+
+    @JsonAdapter(SqlDateAdapter.class) 
     private Date dLExpDate;
+
     private String stat;
 
     public Drivers() {

@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import Vehicle.Vehicles;
 import Vehicle.VehiclesCRUD;
-import Vehicle.SqlDateAdapter; // ✅ Import the adapter
+import DateAdapter.SqlDateAdapter; // ✅ Import the adapter
 
 import java.sql.Date;
 import java.sql.SQLException;

@@ -1,0 +1,235 @@
+/* ✅ Ensure the whole page is scrollable */
+html, body {
+    height: 100%;
+    overflow-y: auto; /* Allow scrolling */
+}
+
+/* ✅ Ensure the booking container does not exceed screen height */
+.booking-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align to top instead of center */
+    min-height: 100vh; /* Make sure it takes full screen height */
+    overflow-y: auto; /* Allow scrolling */
+    padding: 20px;
+}
+
+
+/* ✅ Booking Card */
+.booking-card {
+    width: 100%;
+    max-width: 1000px; /* Prevent exceeding width */
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 15px rgba(218, 165, 32, 0.3);
+    background: white;
+    color: black;
+    border: 2px solid #d4af37;
+    max-height: none; /* Remove height limit */
+    overflow-y: visible; /* Let it grow dynamically */
+}
+/* ✅ Card Header */
+.card-header {
+    background: #d4af37;
+    color: black;
+    font-weight: bold;
+    text-align: center;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+/* ✅ Category Selection Container */
+.category-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px;
+}
+
+/* ✅ Default styles */
+.category-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 12px;
+    border-radius: 12px;
+    margin: 3px;
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+    border: 2px solid #d4af37;
+    background: white;
+    color: black;
+    flex: 1 1 calc(14% - 12px); /* 🟡 7 items per row */
+    min-width: 120px;
+    max-width: 150px;
+}
+
+.category-option img {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 5px;
+}
+
+.category-option p {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+/* ✅ Passenger icon */
+.category-passengers {
+    font-size: 12px;
+    color: #444;
+    background: rgba(212, 175, 55, 0.1);
+    padding: 4px 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* ✅ Default icon color */
+.category-passengers i {
+    color: #d4af37; /* Golden */
+    font-size: 14px;
+}
+/* ✅ Hover effect */
+.category-option:hover {
+    border-color: #d4af37;
+    transform: scale(1.05);
+}
+/* ✅ Selected category styling */
+.category-option.selected {
+    background-color: #d4af37;  /* Change background */
+    color: black;               /* Change text color */
+    font-weight: bold;
+    border-color: #fff;
+    transform: scale(1.05);
+}
+/* ✅ Change icon color when category is selected */
+.category-option.selected .category-passengers i {
+    color: black !important;  /* Change icon to black */
+}
+
+
+/* ✅ Responsive Grid Layout */
+@media (max-width: 1200px) {
+    .category-option {
+        flex: 1 1 calc(25% - 10px); /* 🟡 4 items per row */
+    }
+}
+
+@media (max-width: 992px) {
+    .category-option {
+        flex: 1 1 calc(33.33% - 10px); /* 🟡 3 items per row */
+    }
+}
+
+@media (max-width: 768px) {
+    .category-option {
+        flex: 1 1 calc(50% - 10px); /* 🟡 2 items per row */
+    }
+}
+
+@media (max-width: 480px) {
+    .category-option {
+        flex: 1 1 100%; /* 🟡 1 item per row */
+    }
+}
+
+/* ✅ Golden Buttons */
+.btn-gold {
+    background: #d4af37;
+    color: black;
+    font-weight: bold;
+    border: none;
+}
+
+.btn-gold:hover {
+    background: #b99624;
+    color: black;
+}
+
+
+/* ✅ Alerts */
+.alert-gold {
+    background: #d4af37;
+    color: black;
+    font-weight: bold;
+}
+
+/* ✅ Button Group */
+.btn-group .btn {
+    background: #3a3a3a;
+    margin: 8px;
+    color: white;
+    border-radius: 15px;
+    border-color: #d4af37;
+}
+
+.btn-group .btn:hover {
+    background: #d4af37;
+    color: black;
+}
+
+/* ✅ Inputs */
+input, select {
+    background: white;
+    color: black;
+    border: 1px solid #d4af37;
+}
+
+input:focus, select:focus {
+    border-color: #fff;
+    outline: none;
+    box-shadow: 0px 0px 5px rgba(212, 175, 55, 0.8);
+}
+/* ✅ Make package cards selectable */
+.package-option {
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+    border: 2px solid #d4af37;
+    background: white;
+    color: black;
+    border-radius: 10px;
+}
+
+.package-option:hover {
+    transform: scale(1.05);
+    border-color: #d4af37;
+}
+
+.package-option.selected {
+    background-color: #d4af37;
+    color: black;
+    font-weight: bold;
+    border-color: #fff;
+    transform: scale(1.05);
+}
+/* ✅ Make final booking details compact */
+#finalBookingDetails .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+#finalBookingDetails .col-md-6 {
+    flex: 1 1 48%; /* Keep date and time in the same row */
+}
+
+#finalBookingDetails .mb-3 {
+    margin-bottom: 10px;
+}
+
+/* ✅ Ensure button stays selected */
+/* ✅ Ensure button stays selected */
+.btn-group .btn.selected {
+    background-color: #d4af37 !important;
+    color: black !important;
+    font-weight: bold;
+    border-color: #fff !important;
+    transform: scale(1.05);
+}

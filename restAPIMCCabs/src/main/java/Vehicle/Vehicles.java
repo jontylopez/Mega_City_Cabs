@@ -1,5 +1,6 @@
 package Vehicle;
 
+import DateAdapter.SqlDateAdapter;
 import java.sql.Date;
 import com.google.gson.annotations.JsonAdapter;
 

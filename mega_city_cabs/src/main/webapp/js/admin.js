@@ -27,51 +27,58 @@ function loadPage(url) {
 
             console.log("✅ Page Loaded: ", url);
 
+            // ✅ Handle Category Manager
             if (url.includes("categoryManager.jsp")) {
                 console.log("📌 Category Manager Loaded! Fetching categories...");
-                
-                // ✅ Fetch categories & update table
                 updateCategoryTable();
 
                 // ✅ Ensure Category Form works
-                setTimeout(() => {
-                    const categoryForm = document.getElementById("categoryForm");
-                    if (categoryForm) {
-                        categoryForm.addEventListener("submit", function (event) {
-                            event.preventDefault();
-                            createCategory();
-                        });
-                    }
-                }, 300);
+                setupForm("categoryForm", createCategory);
             }
 
+            // ✅ Handle Vehicle Manager
             if (url.includes("vehicleManager.jsp")) {
                 console.log("📌 Vehicle Manager Loaded! Fetching vehicles...");
-                
-                // ✅ Fetch vehicles & update table
                 updateVehicleTable();
 
-                // ✅ Populate dropdowns AFTER page loads
-                setTimeout(() => {
-                    console.log("📌 Populating Vehicle Category Dropdowns...");
-                    updateCategoryDropdowns();
-                }, 300);
+                // ✅ Populate category dropdowns
+                updateCategoryDropdowns();
 
                 // ✅ Ensure Vehicle Form works
-                setTimeout(() => {
-                    const vehicleForm = document.getElementById("vehicleForm");
-                    if (vehicleForm) {
-                        vehicleForm.addEventListener("submit", function (event) {
-                            event.preventDefault();
-                            createVehicle();
-                        });
-                    }
-                }, 300);
+                setupForm("vehicleForm", createVehicle);
+            }
+
+            // ✅ Handle Driver Manager
+            if (url.includes("driverManager.jsp")) {
+                console.log("📌 Driver Manager Loaded! Fetching drivers...");
+                updateDriverTable();
+
+                // ✅ Ensure Driver Form works
+                setupForm("driverForm", createDriver);
             }
         })
         .catch(error => console.error("❌ Error loading page:", error));
 }
 
+/**
+ * ✅ Utility Function: Attach Event Listener to Forms
+ * @param {string} formId - The ID of the form
+ * @param {function} submitHandler - The function to call on form submission
+ */
+function setupForm(formId, submitHandler) {
+    setTimeout(() => {
+        const form = document.getElementById(formId);
+        if (form) {
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+                submitHandler();
+            });
+            console.log(`✅ Form ${formId} initialized.`);
+        } else {
+            console.warn(`⚠️ Form ${formId} not found.`);
+        }
+    }, 300);
+}
 // 🔹 Setup Click Event for Sidebar Links
 function setupLinks() {
     document.querySelectorAll(".sidebar .nav-link, .profile-link").forEach(link => {
@@ -524,5 +531,194 @@ async function deleteVehicle(id) {
 document.addEventListener("DOMContentLoaded", function () {
     if (window.location.href.includes("vehicleManager.jsp")) {
        updateVehicleTable();
+    }
+});
+
+
+// ==========================================
+// 🔹 DRIVER MANAGEMENT FUNCTIONS
+// ==========================================
+const driverApiUrl = "http://localhost:8080/restAPIMCCabs/api/drivers";
+
+/**
+ * ✅ Fetch Drivers Data
+ */
+async function getDrivers() {
+    console.log("📌 Fetching drivers...");
+
+    try {
+        const response = await fetch(driverApiUrl);
+        if (!response.ok) throw new Error(`❌ HTTP Error: ${response.status}`);
+
+        const drivers = await response.json();
+        console.log("✅ API Response Data:", drivers);
+
+        return drivers; // Return fetched data instead of updating UI
+    } catch (error) {
+        console.error("🚨 Fetch Error:", error);
+        return []; // Return empty array in case of error
+    }
+}
+
+/**
+ * ✅ Update Driver Table with Data
+ */
+async function updateDriverTable() {
+    const drivers = await getDrivers(); // Fetch data first
+
+    const tableBody = document.getElementById("driverTableBody");
+    if (!tableBody) {
+        console.error("❌ driverTableBody not found!");
+        return;
+    }
+
+    tableBody.innerHTML = ""; // ✅ Clear table before inserting new data
+
+    drivers.forEach(driver => {
+        const row = `
+        <tr>
+            <td>${driver.id}</td>
+            <td>${driver.dName}</td>
+            <td>${driver.dAddress}</td>
+            <td>${driver.dTel}</td>
+            <td>${driver.dLNum}</td>
+            <td>${driver.dLExpDate}</td>
+            <td><span class="badge bg-${driver.stat === "Active" ? "success" : "danger"}">${driver.stat}</span></td>
+            <td>
+                <button class="btn btn-warning btn-sm" onclick="editDriver(${driver.id}, '${driver.dName}', '${driver.dAddress}', '${driver.dTel}', '${driver.dLNum}', '${driver.dLExpDate}', '${driver.stat}')"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-danger btn-sm" onclick="deleteDriver(${driver.id})"><i class="bi bi-trash"></i></button>
+            </td>
+        </tr>`;
+        tableBody.innerHTML += row;
+    });
+
+    console.log("✅ Driver Table Updated!");
+}
+
+/**
+ * ✅ Create a New Driver
+ */
+async function createDriver() {
+    const driver = {
+        dName: document.getElementById("dName").value.trim(),
+        dAddress: document.getElementById("dAddress").value.trim(),
+        dTel: document.getElementById("dTel").value.trim(),
+        dLNum: document.getElementById("dLNum").value.trim(),
+        dLExpDate: document.getElementById("dLExpDate").value,
+        stat: "Active"
+    };
+
+    console.log("📌 Sending Driver Data:", JSON.stringify(driver, null, 2));
+
+    try {
+        const response = await fetch(driverApiUrl + "/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(driver)
+        });
+
+        const responseData = await response.json();
+        console.log("✅ API Response:", responseData);
+
+        if (!response.ok) {
+            alert(responseData.message || "❌ Error creating driver.");
+            return;
+        }
+
+        alert("✅ Driver created successfully!");
+        updateDriverTable(); // Refresh driver list
+        document.getElementById("driverForm").reset();
+    } catch (error) {
+        console.error("🚨 Error adding driver:", error);
+        alert("🚨 Server error! Please try again.");
+    }
+}
+
+/**
+ * ✅ Edit a Driver (Pre-fill update form)
+ */
+function editDriver(id, dName, dAddress, dTel, dLNum, dLExpDate, stat) {
+    if (!document.getElementById("updateDriverId")) {
+        console.error("❌ Update form not found!");
+        return;
+    }
+
+    document.getElementById("updateDriverId").value = id;
+    document.getElementById("updateDName").value = dName;
+    document.getElementById("updateDAddress").value = dAddress;
+    document.getElementById("updateDTel").value = dTel;
+    document.getElementById("updateDLNum").value = dLNum;
+    document.getElementById("updateDLExpDate").value = dLExpDate;
+    document.getElementById("updateStat").value = stat;
+
+    document.getElementById("updateDriverForm").style.display = "block";
+}
+
+/**
+ * ✅ Update a Driver
+ */
+async function submitDriverUpdate() {
+    const id = document.getElementById("updateDriverId").value;
+    const updatedDriver = {
+        id: parseInt(id),
+        dName: document.getElementById("updateDName").value.trim(),
+        dAddress: document.getElementById("updateDAddress").value.trim(),
+        dTel: document.getElementById("updateDTel").value.trim(),
+        dLNum: document.getElementById("updateDLNum").value.trim(),
+        dLExpDate: document.getElementById("updateDLExpDate").value,
+        stat: document.getElementById("updateStat").value
+    };
+
+    console.log("📌 Sending Update Request:", updatedDriver);
+
+    try {
+        const response = await fetch(`${driverApiUrl}/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedDriver)
+        });
+
+        if (!response.ok) throw new Error(`❌ HTTP Error: ${response.status}`);
+
+        const responseData = await response.json();
+        console.log("✅ API Response:", responseData);
+        alert("✅ Updated");
+        updateDriverTable();
+        cancelDriverUpdate();
+    } catch (error) {
+        console.error("🚨 Fetch Error:", error);
+    }
+}
+
+/**
+ * ✅ Cancel Update
+ */
+function cancelDriverUpdate() {
+    document.getElementById("updateDriverForm").style.display = "none";
+}
+
+/**
+ * ✅ Delete a Driver
+ */
+async function deleteDriver(id) {
+    if (confirm("Are you sure you want to delete this driver?")) {
+        try {
+            const response = await fetch(`${driverApiUrl}/${id}`, {
+                method: "DELETE"
+            });
+
+            if (!response.ok) throw new Error(`❌ HTTP Error: ${response.status}`);
+            alert("✅ Deleted");
+            updateDriverTable(); // Refresh driver list
+        } catch (error) {
+            console.error("🚨 Fetch Error:", error);
+        }
+    }
+}
+
+// ✅ Ensure drivers load on page load
+document.addEventListener("DOMContentLoaded", function () {
+    if (window.location.href.includes("driverManager.jsp")) {
+        updateDriverTable();
     }
 });

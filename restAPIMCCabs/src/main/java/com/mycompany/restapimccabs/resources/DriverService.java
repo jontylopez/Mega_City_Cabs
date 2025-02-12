@@ -1,22 +1,23 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.restapimccabs.resources;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import DateAdapter.SqlDateAdapter;
 import Driver.Drivers;
 import Driver.DriversCRUD;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.sql.Date;
 import java.util.List;
 
 @Path("drivers")
 public class DriverService {
     private final DriversCRUD driversCRUD = new DriversCRUD();
-    private final Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Date.class, new SqlDateAdapter()) // ✅ Use Date Adapter
+            .create();
 
     @POST
     @Path("/create")
@@ -39,6 +40,11 @@ public class DriverService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDrivers() {
         List<Drivers> drivers = driversCRUD.getDrivers();
+        if (drivers.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("{\"message\": \"No drivers found\"}")
+                    .build();
+        }
         return Response.ok(gson.toJson(drivers)).build();
     }
 
