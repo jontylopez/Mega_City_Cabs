@@ -120,7 +120,24 @@
                             <label>Pickup Address:</label>
                             <input type="text" class="form-control" id="pickupAddress" placeholder="Enter pickup location">
                         </div>
+                        <!-- Check Availability Button -->
+                        <div class="text-center">
+                            <button type="button" class="btn btn-gold" onclick="checkAvailability()">
+                                <i class="bi bi-search"></i> Check Availability
+                            </button>
+                        </div>
 
+                        <!-- Availability Results in One Line -->
+                        <div class="mt-3 d-flex justify-content-center gap-3">
+                            <p id="vehicleAvailability" class="text-warning mb-0"></p>
+                            <p id="driverAvailability" class="text-warning mb-0"></p>
+                        </div>
+                        <!-- Reserve the Booking Button (Initially Hidden) -->
+                        <div class="text-center mt-3">
+                            <button id="reserveBookingBtn" class="btn btn-success" style="display: none;" onclick="reserveBooking()">
+                                <i class="bi bi-check-circle"></i> Reserve the Booking
+                            </button>
+                        </div>
 
                     </div>
 

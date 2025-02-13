@@ -222,28 +222,116 @@ function selectPackage(packageType) {
 }
 
 
+const jointApiUrl = "http://localhost:8080/restAPIMCCabs/api/joint";
 
-// 🔹 Confirm Booking (Handles Final Form Submission)
-function confirmBooking() {
-    const selectedCategory = document.getElementById("selectedCategoryId").value;
-    const bookingDate = document.getElementById("bookingDate").value;
-    const bookingTime = document.getElementById("bookingTime").value;
-    const pickupAddress = document.getElementById("pickupAddress").value;
-    
-    if (!selectedCategory || !bookingDate || !bookingTime || !pickupAddress) {
-        alert("❌ Please fill all required details!");
+/**
+ * ✅ Check Vehicle & Driver Availability using API
+ */
+async function checkAvailability() {
+    const categoryId = document.getElementById("selectedCategoryId").value;
+    const startDate = document.getElementById("bookingDate").value;
+    let endDate = document.getElementById("endDate").value || startDate; // Use bookingDate if endDate is empty
+
+    if (!categoryId || !startDate) {
+        alert("❌ Please select a category and a booking date!");
         return;
     }
 
-    const bookingDetails = {
-        categoryId: selectedCategory,
-        bookingDate,
-        bookingTime,
-        pickupAddress
+    console.log("🔍 Checking availability for Category:", categoryId, "From:", startDate, "To:", endDate);
+
+    try {
+        // ✅ Check Available Vehicles for the Category & Date Range
+        const vehicleResponse = await fetch(`${jointApiUrl}/availableVehicles/${categoryId}/${startDate}/${endDate}`);
+        if (!vehicleResponse.ok) throw new Error("🚨 Failed to fetch vehicle availability!");
+        const availableVehicles = await vehicleResponse.json();
+
+        // ✅ Check Available Drivers for the Date Range
+        const driverResponse = await fetch(`${jointApiUrl}/availableDrivers/${startDate}/${endDate}`);
+        if (!driverResponse.ok) throw new Error("🚨 Failed to fetch driver availability!");
+        const availableDrivers = await driverResponse.json();
+
+        // ✅ Display Availability Results
+        document.getElementById("vehicleAvailability").innerText = availableVehicles.length > 0
+            ? `✅ ${availableVehicles.length} Vehicles Available`
+            : "❌ No Vehicles Available";
+
+        document.getElementById("driverAvailability").innerText = availableDrivers.length > 0
+            ? `✅ ${availableDrivers.length} Drivers Available`
+            : "❌ No Drivers Available";
+
+        // ✅ Show "Reserve" button only if vehicles are available
+        document.getElementById("reserveBookingBtn").style.display = availableVehicles.length > 0 ? "block" : "none";
+
+    } catch (error) {
+        console.error("🚨 Error checking availability:", error);
+        alert("❌ Error checking availability! Please try again.");
+    }
+}
+
+/**
+ * ✅ Reserve the Booking by Sending Data to the Backend
+ */
+async function reserveBooking() {
+    const userId = getSessionUserId();
+    if (!userId) {
+        alert("❌ Session expired! Please log in again.");
+        window.location.href = "login.jsp"; // Redirect to login page
+        return;
+    }
+
+    const categoryId = document.getElementById("selectedCategoryId").value;
+    const startDate = document.getElementById("bookingDate").value;
+    let endDate = document.getElementById("endDate").value || startDate; // Use startDate if endDate is empty
+    const startTime = document.getElementById("bookingTime").value;
+    const startLocation = document.getElementById("pickupAddress").value;
+
+    if (!categoryId || !startDate || !startTime || !startLocation) {
+        alert("❌ Please fill in all required details!");
+        return;
+    }
+
+    const bookingData = {
+        userId: userId, // ✅ Now correctly retrieved from sessionStorage
+        categoryId: categoryId,
+        startDate: startDate,
+        endDate: endDate,
+        startTime: startTime + ":00", // Append seconds for SQL Time format
+        startLocation: startLocation
     };
 
-    console.log("🚀 Booking Details Submitted:", bookingDetails);
+    console.log("🚀 Sending Booking Data:", bookingData);
 
-    // ✅ You can now send the bookingDetails object to the API for processing!
-    alert("✅ Booking Confirmed! Our driver will contact you soon.");
+    try {
+        const response = await fetch(`${jointApiUrl}/createReservation`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bookingData)
+        });
+
+        const responseData = await response.json();
+        console.log("✅ API Response:", responseData);
+
+        if (response.ok) {
+            alert("✅ Booking Reserved Successfully! Our team will contact you soon.");
+            loadPage("bookingHistory.jsp"); // ✅ Load inside main-content dynamically
+        } else {
+            alert(responseData.message || "❌ Failed to reserve booking! Please try again.");
+        }
+    } catch (error) {
+        console.error("🚨 Error reserving booking:", error);
+        alert("❌ Error reserving booking! Please try again.");
+    }
+}
+
+
+/**
+ * ✅ Get Logged-in User ID from SessionStorage
+ */
+function getSessionUserId() {
+    let userId = sessionStorage.getItem("userId"); // Retrieve user ID from session storage
+    if (!userId) {
+        console.warn("⚠️ User ID not found in sessionStorage! User may be logged out.");
+        return null;
+    }
+    return parseInt(userId, 10); // Convert to integer for safety
 }
