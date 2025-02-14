@@ -80,6 +80,7 @@
                                     <div class="card p-3 mb-3 text-center package-option" id="package1" onclick="selectPackage(1)">
                                         <h6 class="fw-bold">Package 1</h6>
                                         <p>Up to 50 Km</p>
+                                        <p>Included Waiting Hours: <span id="pkg1Hrs"></span> hrs</p>
                                         <p>Waiting Charge: Rs <span id="waitingCharge1"></span>/hr</p>
                                         <p>Extra Km Charge: Rs <span id="extraKmCharge1"></span>/Km</p>
                                         <h5>Rs <span id="milePkg1Price"></span></h5>
@@ -91,12 +92,14 @@
                                     <div class="card p-3 mb-3 text-center package-option" id="package2" onclick="selectPackage(2)">
                                         <h6 class="fw-bold">Package 2</h6>
                                         <p>Up to 100 Km</p>
+                                        <p>Included Waiting Hours: <span id="pkg2Hrs"></span> hrs</p>
                                         <p>Waiting Charge: Rs <span id="waitingCharge2"></span>/hr</p>
                                         <p>Extra Km Charge: Rs <span id="extraKmCharge2"></span>/Km</p>
                                         <h5>Rs <span id="milePkg2Price"></span></h5>
                                     </div>
                                 </div>
                             </div>
+
                         </div>
 
                         <!-- Final Booking Details -->
@@ -134,8 +137,8 @@
                         </div>
                         <!-- Reserve the Booking Button (Initially Hidden) -->
                         <div class="text-center mt-3">
-                            <button id="reserveBookingBtn" class="btn btn-success" style="display: none;" onclick="reserveBooking()">
-                                <i class="bi bi-check-circle"></i> Reserve the Booking
+                            <button id="showSummaryBtn" class="btn btn-success" style="display: none;" onclick="showBookingSummary()">
+                                <i class="bi bi-receipt"></i> Show Booking Summary
                             </button>
                         </div>
 
@@ -144,6 +147,47 @@
                 </div>
             </div>
         </div>
+        <!-- Booking Summary Modal -->
+        <div id="bookingSummary" class="modal-overlay" style="display: none;">
+            <div class="modal-box">
+                <h4><i class="bi bi-receipt"></i> Booking Summary</h4>
+                <hr>
+
+                <div class="summary-content">
+                    <p><strong>Category:</strong> <span id="summaryCategory"></span></p>
+                    <p><strong>Start Date:</strong> <span id="summaryStartDate"></span></p>
+                    <p><strong>End Date:</strong> <span id="summaryEndDate"></span></p>
+                    <p><strong>Number of Days:</strong> <span id="summaryDays"></span></p>
+                    <p><strong>Total Amount:</strong> Rs <span id="summaryAmount"></span></p>
+                </div>
+
+                <!-- Terms & Conditions -->
+                <h5 class="text-center mt-3"><i class="bi bi-exclamation-triangle"></i> Terms & Conditions</h5>
+                <ul class="terms-list">
+                    <li>You will be charged the full amount upon confirmation.</li>
+                    <li>Additional kilometers will be charged separately.</li>
+                    <li>Waiting charges apply if you exceed included hours.</li>
+                    <li>No refund upon cancellation within 24 hours.</li>
+                </ul>
+
+                <!-- Checkbox for Terms & Conditions -->
+                <div class="text-center mt-2">
+                    <input type="checkbox" id="termsCheckbox" onchange="togglePayButton()">
+                    <label for="termsCheckbox"> I agree to the Terms & Conditions</label>
+                </div>
+
+                <!-- Buttons -->
+                <div class="modal-buttons text-center">
+                    <button id="confirmPayBtn" class="btn btn-success" disabled onclick="confirmPayment()">
+                        <i class="bi bi-check-circle"></i> Confirm & Pay
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeBookingSummary()">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </button>
+                </div>
+            </div>
+        </div>
+
 
         <script src="../js/customer.js"></script>
     </body>

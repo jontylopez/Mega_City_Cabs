@@ -135,12 +135,14 @@ async function updateCategoryTable() {
             <td>${category.perDayValue}</td>
             <td>${category.maxKmPerDay}</td>
             <td>${category.milePkg1}</td>
+            <td>${category.pkg1Hrs}</td> <!-- ✅ New Column -->
             <td>${category.milePkg2}</td>
+            <td>${category.pkg2Hrs}</td> <!-- ✅ New Column -->
             <td>${category.waitingPerHr}</td>
             <td>${category.extraKm}</td>
             <td><span class="badge bg-${category.active === "Active" ? "success" : "danger"}">${category.active}</span></td>
             <td>
-                <button class="btn btn-warning btn-sm" onclick="editCategory(${category.id}, '${category.catName}', ${category.maxPsngr}, ${category.perDayValue}, ${category.maxKmPerDay}, ${category.milePkg1}, ${category.milePkg2}, ${category.waitingPerHr}, ${category.extraKm}, '${category.active}')"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-warning btn-sm" onclick="editCategory(${category.id}, '${category.catName}', ${category.maxPsngr}, ${category.perDayValue}, ${category.maxKmPerDay}, ${category.milePkg1}, ${category.pkg1Hrs}, ${category.milePkg2}, ${category.pkg2Hrs}, ${category.waitingPerHr}, ${category.extraKm}, '${category.active}')"><i class="bi bi-pencil"></i></button>
                 <button class="btn btn-danger btn-sm" onclick="deleteCategory(${category.id})"><i class="bi bi-trash"></i></button>
             </td>
         </tr>`;
@@ -148,10 +150,7 @@ async function updateCategoryTable() {
     });
 
     console.log("✅ Category Table Updated!");
-    
 }
-
-
 
 // 🔹 Create a New Category
 async function createCategory() {
@@ -161,7 +160,9 @@ async function createCategory() {
         perDayValue: parseFloat(document.getElementById("perDayValue").value),
         maxKmPerDay: parseInt(document.getElementById("maxKmPerDay").value),
         milePkg1: parseFloat(document.getElementById("milePkg1").value),
+        pkg1Hrs: parseInt(document.getElementById("pkg1Hrs").value), // ✅ New Field
         milePkg2: parseFloat(document.getElementById("milePkg2").value),
+        pkg2Hrs: parseInt(document.getElementById("pkg2Hrs").value), // ✅ New Field
         waitingPerHr: parseFloat(document.getElementById("waitingPerHr").value),
         extraKm: parseFloat(document.getElementById("extraKm").value),
         active: document.getElementById("active").value
@@ -180,7 +181,7 @@ async function createCategory() {
         console.log("✅ API Response:", responseData);
 
         if (response.ok) {
-            alert("✅ Created");
+            alert("✅ Category Created Successfully!");
             updateCategoryTable(); // Refresh list
             document.getElementById("categoryForm").reset();
         } else {
@@ -192,29 +193,22 @@ async function createCategory() {
 }
 
 // 🔹 Edit a Category
-function editCategory(id, catName, maxPsngr, perDayValue, maxKmPerDay, milePkg1, milePkg2, waitingPerHr, extraKm, active) {
-    // ✅ Ensure the update form exists before accessing its elements
-    if (!document.getElementById("updateCategoryId")) {
-        console.error("❌ Update form not found! Make sure categoryManager.jsp is properly loaded.");
-        return;
-    }
-
-    // ✅ Assign values if elements exist
+function editCategory(id, catName, maxPsngr, perDayValue, maxKmPerDay, milePkg1, pkg1Hrs, milePkg2, pkg2Hrs, waitingPerHr, extraKm, active) {
     document.getElementById("updateCategoryId").value = id;
     document.getElementById("updateCatName").value = catName;
     document.getElementById("updateMaxPsngr").value = maxPsngr;
     document.getElementById("updatePerDayValue").value = perDayValue;
     document.getElementById("updateMaxKmPerDay").value = maxKmPerDay;
     document.getElementById("updateMilePkg1").value = milePkg1;
+    document.getElementById("updatePkg1Hrs").value = pkg1Hrs; // ✅ New Field
     document.getElementById("updateMilePkg2").value = milePkg2;
+    document.getElementById("updatePkg2Hrs").value = pkg2Hrs; // ✅ New Field
     document.getElementById("updateWaitingPerHr").value = waitingPerHr;
     document.getElementById("updateExtraKm").value = extraKm;
     document.getElementById("updateActive").value = active;
 
-    // ✅ Make sure the update form is visible
     document.getElementById("updateForm").style.display = "block";
 }
-
 
 // 🔹 Update a Category
 async function submitUpdate(event = null) {  
@@ -227,9 +221,11 @@ async function submitUpdate(event = null) {
         maxPsngr: parseInt(document.getElementById("updateMaxPsngr").value),
         perDayValue: parseFloat(document.getElementById("updatePerDayValue").value),
         maxKmPerDay: parseInt(document.getElementById("updateMaxKmPerDay").value),
-        milePkg1: parseFloat(document.getElementById("updateMilePkg1").value),  // ✅ Added MilePkg1
-        milePkg2: parseFloat(document.getElementById("updateMilePkg2").value),  // ✅ Added MilePkg2
-        waitingPerHr: parseFloat(document.getElementById("updateWaitingPerHr").value),  // ✅ Added WaitingPerHr
+        milePkg1: parseFloat(document.getElementById("updateMilePkg1").value),
+        pkg1Hrs: parseInt(document.getElementById("updatePkg1Hrs").value), // ✅ New Field
+        milePkg2: parseFloat(document.getElementById("updateMilePkg2").value),
+        pkg2Hrs: parseInt(document.getElementById("updatePkg2Hrs").value), // ✅ New Field
+        waitingPerHr: parseFloat(document.getElementById("updateWaitingPerHr").value),
         extraKm: parseFloat(document.getElementById("updateExtraKm").value),
         active: document.getElementById("updateActive").value
     };
@@ -243,22 +239,17 @@ async function submitUpdate(event = null) {
             body: JSON.stringify(updatedCategory)
         });
 
-        const responseData = await response.json();
-        console.log("📌 API Response:", responseData);
-
         if (response.ok) {
-            alert("✅ Updated");
+            alert("✅ Category Updated Successfully!");
             updateCategoryTable();
             cancelUpdate();
-            
         } else {
-            console.error("❌ Update Failed:", responseData);
+            console.error("❌ Update Failed");
         }
     } catch (error) {
         console.error("🚨 Fetch Error:", error);
     }
 }
-
 
 // 🔹 Cancel Update
 function cancelUpdate() {
@@ -269,13 +260,11 @@ function cancelUpdate() {
 async function deleteCategory(id) {
     if (confirm("Are you sure you want to delete this category?")) {
         try {
-            const response = await fetch(`${categoryApiUrl}/${id}`, {
-                method: "DELETE"
-            });
+            const response = await fetch(`${categoryApiUrl}/${id}`, { method: "DELETE" });
 
             if (response.ok) {
-               alert("✅ Deleted");
-               updateCategoryTable(); // ✅ Refresh the list dynamically
+                alert("✅ Category Deleted Successfully!");
+                updateCategoryTable();
             } else {
                 console.error("❌ Delete Failed");
             }

@@ -42,8 +42,16 @@
                             <input type="number" class="form-control" id="milePkg1" step="0.01" required>
                         </div>
                         <div class="col-md-6">
+                            <label class="form-label">Package 1 Hours</label>
+                            <input type="number" class="form-control" id="pkg1Hrs" required>
+                        </div>
+                        <div class="col-md-6">
                             <label class="form-label">Mile Package 2</label>
                             <input type="number" class="form-control" id="milePkg2" step="0.01" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Package 2 Hours</label>
+                            <input type="number" class="form-control" id="pkg2Hrs" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Waiting Per Hour</label>
@@ -79,7 +87,9 @@
                             <th>Per Day</th>
                             <th>Max Km/Day</th>
                             <th>Mile Pkg 1</th>
+                            <th>Pkg 1 Hrs</th>
                             <th>Mile Pkg 2</th>
+                            <th>Pkg 2 Hrs</th>
                             <th>Waiting Per Hr</th>
                             <th>Extra Km</th>
                             <th>Status</th>
@@ -94,53 +104,61 @@
         </div>
         
         <!-- Update Category Form -->
-<div class="card mb-4 shadow-sm" id="updateForm" style="display: none;">
-    <div class="card-header bg-primary text-white">Edit Category</div>
-    <div class="card-body">
-        <input type="hidden" id="updateCategoryId">
-        <div class="mb-3">
-            <label class="form-label">Category Name</label>
-            <input type="text" class="form-control" id="updateCatName">
+        <div class="card mb-4 shadow-sm" id="updateForm" style="display: none;">
+            <div class="card-header bg-primary text-white">Edit Category</div>
+            <div class="card-body">
+                <input type="hidden" id="updateCategoryId">
+                <div class="mb-3">
+                    <label class="form-label">Category Name</label>
+                    <input type="text" class="form-control" id="updateCatName">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Max Passengers</label>
+                    <input type="number" class="form-control" id="updateMaxPsngr">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Per Day Value</label>
+                    <input type="number" class="form-control" id="updatePerDayValue" step="0.01">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Max Km Per Day</label>
+                    <input type="number" class="form-control" id="updateMaxKmPerDay">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mile Package 1</label>
+                    <input type="number" class="form-control" id="updateMilePkg1" step="0.01">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Package 1 Hours</label>
+                    <input type="number" class="form-control" id="updatePkg1Hrs">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mile Package 2</label>
+                    <input type="number" class="form-control" id="updateMilePkg2" step="0.01">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Package 2 Hours</label>
+                    <input type="number" class="form-control" id="updatePkg2Hrs">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Waiting Per Hour</label>
+                    <input type="number" class="form-control" id="updateWaitingPerHr" step="0.01">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Extra Km Charge</label>
+                    <input type="number" class="form-control" id="updateExtraKm" step="0.01">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-control" id="updateActive">
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="submitUpdate()">Update Category</button>
+                <button class="btn btn-secondary" onclick="cancelUpdate()">Cancel</button>
+            </div>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Max Passengers</label>
-            <input type="number" class="form-control" id="updateMaxPsngr">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Per Day Value</label>
-            <input type="number" class="form-control" id="updatePerDayValue" step="0.01">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Max Km Per Day</label>
-            <input type="number" class="form-control" id="updateMaxKmPerDay">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Mile Package 1</label>
-            <input type="number" class="form-control" id="updateMilePkg1" step="0.01">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Mile Package 2</label>
-            <input type="number" class="form-control" id="updateMilePkg2" step="0.01">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Waiting Per Hour</label>
-            <input type="number" class="form-control" id="updateWaitingPerHr" step="0.01">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Extra Km Charge</label>
-            <input type="number" class="form-control" id="updateExtraKm" step="0.01">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Status</label>
-            <select class="form-control" id="updateActive">
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-            </select>
-        </div>
-        <button class="btn btn-primary" onclick="submitUpdate()">Update Category</button>
-        <button class="btn btn-secondary" onclick="cancelUpdate()">Cancel</button>
-    </div>
-</div>
 
     </div>
 

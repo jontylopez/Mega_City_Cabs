@@ -81,6 +81,7 @@ async function getCategories() {
     }
 }
 
+// 🔹 Load Categories Dynamically
 async function loadCategoriesForBooking() {
     console.log("📌 Fetching categories for Booking Page...");
     const categories = await getCategories(); // ✅ Fetch categories
@@ -94,13 +95,13 @@ async function loadCategoriesForBooking() {
     categoryList.innerHTML = ""; // ✅ Clear previous content
 
     categories.forEach(category => {
-        // ✅ Construct Image Path (Appending .svg to catName)
+        // ✅ Construct Image Path
         const imagePath = `../images/${category.catName}.svg`;
 
         // ✅ Create Category Button with Image and Passenger Info
         const card = `
         <div class="category-option" 
-             onclick="selectCategory(${category.id}, '${category.catName}', ${category.perDayValue}, ${category.maxKmPerDay}, ${category.extraKm}, ${category.milePkg1}, ${category.milePkg2}, ${category.waitingPerHr})">
+             onclick="selectCategory(${category.id}, '${category.catName}', ${category.perDayValue}, ${category.maxKmPerDay}, ${category.extraKm}, ${category.milePkg1}, ${category.pkg1Hrs}, ${category.milePkg2}, ${category.pkg2Hrs}, ${category.waitingPerHr})">
             <img src="${imagePath}" alt="${category.catName}" class="category-img"
                  onerror="this.onerror=null; this.src='../images/default.svg';">
             <p>${category.catName}</p>
@@ -113,9 +114,8 @@ async function loadCategoriesForBooking() {
     console.log("✅ Categories Loaded on Booking Page!");
 }
 
-
 // 🔹 Function to Handle Category Selection
-function selectCategory(id, name, perDayValue, maxKmPerDay, extraKm, milePkg1, milePkg2, waitingPerHr) {
+function selectCategory(id, name, perDayValue, maxKmPerDay, extraKm, milePkg1, pkg1Hrs, milePkg2, pkg2Hrs, waitingPerHr) {
     console.log(`📌 Selected Category: ${name} (ID: ${id})`);
 
     // ✅ Remove selected class from all categories
@@ -137,15 +137,27 @@ function selectCategory(id, name, perDayValue, maxKmPerDay, extraKm, milePkg1, m
     document.getElementById("extraKmCharge").value = `Rs ${extraKm} per extra km`;
     document.getElementById("extraKmRate").innerText = extraKm; // Update charge note
 
-    // ✅ Populate Package Pricing and Additional Charges
+    // ✅ Populate Package Pricing, Included Waiting Hours, and Additional Charges
     document.getElementById("milePkg1Price").innerText = milePkg1;
     document.getElementById("milePkg2Price").innerText = milePkg2;
-
-    // ✅ Populate Waiting and Extra Km Charges for Packages
+    document.getElementById("pkg1Hrs").innerText = pkg1Hrs;  // ✅ Added Package 1 included waiting hours
+    document.getElementById("pkg2Hrs").innerText = pkg2Hrs;  // ✅ Added Package 2 included waiting hours
     document.getElementById("waitingCharge1").innerText = waitingPerHr;
     document.getElementById("waitingCharge2").innerText = waitingPerHr;
     document.getElementById("extraKmCharge1").innerText = extraKm;
     document.getElementById("extraKmCharge2").innerText = extraKm;
+}
+
+
+// ✅ Function to handle Package Selection
+function selectPackage(packageType) {
+    // Remove 'selected' class from all package options
+    document.querySelectorAll(".package-option").forEach(el => el.classList.remove("selected"));
+
+    // Add 'selected' class to the clicked package
+    document.getElementById(`package${packageType}`).classList.add("selected");
+
+    console.log(`📌 Selected Package: ${packageType}`);
 }
 
 // ✅ Function to safely toggle between booking types
@@ -210,18 +222,6 @@ function updateBookingDate() {
     document.getElementById("endDate").setAttribute("min", startDate); // Prevent selecting a past end date
 }
 
-// Function to select a package for mileage booking
-function selectPackage(packageType) {
-    // Remove 'selected' class from all package options
-    document.querySelectorAll(".package-option").forEach(el => el.classList.remove("selected"));
-
-    // Add 'selected' class to the clicked package
-    document.getElementById(`package${packageType}`).classList.add("selected");
-
-    console.log(`📌 Selected Package: ${packageType}`);
-}
-
-
 const jointApiUrl = "http://localhost:8080/restAPIMCCabs/api/joint";
 
 /**
@@ -230,7 +230,7 @@ const jointApiUrl = "http://localhost:8080/restAPIMCCabs/api/joint";
 async function checkAvailability() {
     const categoryId = document.getElementById("selectedCategoryId").value;
     const startDate = document.getElementById("bookingDate").value;
-    let endDate = document.getElementById("endDate").value || startDate; // Use bookingDate if endDate is empty
+    let endDate = document.getElementById("endDate").value || startDate;
 
     if (!categoryId || !startDate) {
         alert("❌ Please select a category and a booking date!");
@@ -260,7 +260,7 @@ async function checkAvailability() {
             : "❌ No Drivers Available";
 
         // ✅ Show "Reserve" button only if vehicles are available
-        document.getElementById("reserveBookingBtn").style.display = availableVehicles.length > 0 ? "block" : "none";
+        document.getElementById("showSummaryBtn").style.display = availableVehicles.length > 0 ? "block" : "none";
 
     } catch (error) {
         console.error("🚨 Error checking availability:", error);
@@ -269,19 +269,76 @@ async function checkAvailability() {
 }
 
 /**
- * ✅ Reserve the Booking by Sending Data to the Backend
+ * ✅ Show Booking Summary before confirming payment
+ */
+function showBookingSummary() {
+    const categoryName = document.querySelector(".category-option.selected p").innerText; // Get selected category name
+    const bookingDate = document.getElementById("bookingDate").value;
+    let startDate = bookingDate; // Default start date
+    let endDate = document.getElementById("endDate").value || bookingDate; // Default to booking date if not set
+    const perDayPrice = parseFloat(document.getElementById("perDayPrice").value.replace("Rs ", "")) || 0;
+    const milePkg1Price = parseFloat(document.getElementById("milePkg1Price").innerText) || 0;
+    const milePkg2Price = parseFloat(document.getElementById("milePkg2Price").innerText) || 0;
+
+    let totalAmount = 0;
+    let numberOfDays = 1; // Default to 1 day if no endDate
+    if (document.getElementById("perDayDetails").style.display !== "none") {
+        numberOfDays = Math.max(1, (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24));
+        totalAmount = perDayPrice * numberOfDays;
+    } else {
+        totalAmount = document.getElementById("package1").classList.contains("selected") ? milePkg1Price : milePkg2Price;
+    }
+
+    // ✅ Set Summary Details
+    document.getElementById("summaryCategory").innerText = categoryName;
+    document.getElementById("summaryStartDate").innerText = startDate;
+    document.getElementById("summaryEndDate").innerText = endDate;
+    document.getElementById("summaryDays").innerText = numberOfDays; // Display number of days
+    document.getElementById("summaryAmount").innerText = totalAmount.toFixed(2);
+
+    // ✅ Disable "Confirm & Pay" until checkbox is checked
+    document.getElementById("confirmPayBtn").disabled = true;
+    document.getElementById("termsCheckbox").checked = false;
+
+    // ✅ Show Modal
+    document.getElementById("bookingSummary").style.display = "flex";
+}
+function togglePayButton() {
+    document.getElementById("confirmPayBtn").disabled = !document.getElementById("termsCheckbox").checked;
+}
+
+
+
+/**
+ * ✅ Confirm Payment & Proceed with Booking
+ */
+function confirmPayment() {
+    document.getElementById("bookingSummary").style.display = "none";
+    reserveBooking();
+}
+
+/**
+ * ✅ Close Booking Summary
+ */
+function closeBookingSummary() {
+    document.getElementById("bookingSummary").style.display = "none";
+}
+
+
+/**
+ * ✅ Reserve the Booking
  */
 async function reserveBooking() {
     const userId = getSessionUserId();
     if (!userId) {
         alert("❌ Session expired! Please log in again.");
-        window.location.href = "login.jsp"; // Redirect to login page
+        window.location.href = "login.jsp";
         return;
     }
 
     const categoryId = document.getElementById("selectedCategoryId").value;
     const startDate = document.getElementById("bookingDate").value;
-    let endDate = document.getElementById("endDate").value || startDate; // Use startDate if endDate is empty
+    let endDate = document.getElementById("endDate").value || startDate;
     const startTime = document.getElementById("bookingTime").value;
     const startLocation = document.getElementById("pickupAddress").value;
 
@@ -291,11 +348,11 @@ async function reserveBooking() {
     }
 
     const bookingData = {
-        userId: userId, // ✅ Now correctly retrieved from sessionStorage
+        userId: userId,
         categoryId: categoryId,
         startDate: startDate,
         endDate: endDate,
-        startTime: startTime + ":00", // Append seconds for SQL Time format
+        startTime: startTime + ":00",
         startLocation: startLocation
     };
 
@@ -308,14 +365,11 @@ async function reserveBooking() {
             body: JSON.stringify(bookingData)
         });
 
-        const responseData = await response.json();
-        console.log("✅ API Response:", responseData);
-
         if (response.ok) {
-            alert("✅ Booking Reserved Successfully! Our team will contact you soon.");
-            loadPage("bookingHistory.jsp"); // ✅ Load inside main-content dynamically
+            alert("✅ Booking Reserved Successfully!");
+            loadPage("bookingHistory.jsp");
         } else {
-            alert(responseData.message || "❌ Failed to reserve booking! Please try again.");
+            alert("❌ Failed to reserve booking! Please try again.");
         }
     } catch (error) {
         console.error("🚨 Error reserving booking:", error);
