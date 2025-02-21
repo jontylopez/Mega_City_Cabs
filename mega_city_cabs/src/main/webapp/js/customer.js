@@ -274,7 +274,7 @@ async function checkAvailability() {
 function showBookingSummary() {
     const categoryName = document.querySelector(".category-option.selected p").innerText; // Get selected category name
     const bookingDate = document.getElementById("bookingDate").value;
-    let startDate = bookingDate; // Default start date
+    let startDate = bookingDate; 
     let endDate = document.getElementById("endDate").value || bookingDate; // Default to booking date if not set
     const perDayPrice = parseFloat(document.getElementById("perDayPrice").value.replace("Rs ", "")) || 0;
     const milePkg1Price = parseFloat(document.getElementById("milePkg1Price").innerText) || 0;
