@@ -14,7 +14,7 @@ public class UsersCRUD {
     private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     public static int addUser(Users user) {
-        String query = "INSERT INTO users (username, pWord, uRole, fullName, address, phone, email, profilePic) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO users (username, pWord, uRole, fullName, address, phone, email) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectionHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, user.getUsername());
@@ -23,8 +23,7 @@ public class UsersCRUD {
             stmt.setString(4, user.getFullName());
             stmt.setString(5, user.getAddress());
             stmt.setString(6, user.getPhone());
-            stmt.setString(7, user.getEmail());
-            stmt.setString(8, user.getProfilePic());
+            stmt.setString(7, user.getEmail());         
             stmt.executeUpdate();
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
@@ -51,9 +50,7 @@ public class UsersCRUD {
                         rs.getString("fullName"),
                         rs.getString("address"),
                         rs.getString("phone"),
-                        rs.getString("email"),
-                        rs.getString("profilePic")
-                ));
+                        rs.getString("email")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -62,7 +59,7 @@ public class UsersCRUD {
     }
 
     public static int updateUser(Users user) {
-        String query = "UPDATE users SET username=?, pWord=?, uRole=?, fullName=?, address=?, phone=?, email=?, profilePic=? WHERE id=?";
+        String query = "UPDATE users SET username=?, pWord=?, uRole=?, fullName=?, address=?, phone=?, email=? WHERE id=?";
         try (Connection conn = ConnectionHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, user.getUsername());
@@ -72,7 +69,7 @@ public class UsersCRUD {
             stmt.setString(5, user.getAddress());
             stmt.setString(6, user.getPhone());
             stmt.setString(7, user.getEmail());
-            stmt.setString(8, user.getProfilePic());
+
             stmt.setInt(9, user.getId());
             return stmt.executeUpdate();
         } catch (SQLException e) {
@@ -102,7 +99,7 @@ public class UsersCRUD {
             if (rs.next()) {
                 String storedHashedPassword = rs.getString("pWord");
                 if (encoder.matches(password, storedHashedPassword)) {
-                    return new Users(rs.getInt("id"), "", "", rs.getString("uRole"), "", "", "", email, "");
+                    return new Users(rs.getInt("id"), "", "", rs.getString("uRole"), "", "", "", email);
                 }
             }
         } catch (SQLException e) {

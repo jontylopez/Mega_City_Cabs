@@ -14,12 +14,11 @@ public class Users {
     private String address;
     private String phone;
     private String email;
-    private String profilePic;
 
-    public Users() {
-    }
 
-    public Users(int id, String username, String pWord, String uRole, String fullName, String address, String phone, String email, String profilePic) {
+    
+
+    public Users(int id, String username, String pWord, String uRole, String fullName, String address, String phone, String email) {
         this.id = id;
         this.username = username;
         this.pWord = pWord;
@@ -28,7 +27,7 @@ public class Users {
         this.address = address;
         this.phone = phone;
         this.email = email;
-        this.profilePic = profilePic;
+      
     }
 
     // Getters and Setters
@@ -96,11 +95,5 @@ public class Users {
         this.email = email;
     }
 
-    public String getProfilePic() {
-        return profilePic;
-    }
-
-    public void setProfilePic(String profilePic) {
-        this.profilePic = profilePic;
-    }
+    
 }
