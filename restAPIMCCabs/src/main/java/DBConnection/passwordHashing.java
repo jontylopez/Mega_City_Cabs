@@ -13,7 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class passwordHashing {
      public static void main(String[] args) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String rawPassword = "admin";
+        String rawPassword = "user";
         String hashedPassword = encoder.encode(rawPassword);
 
         System.out.println("Raw Password: " + rawPassword);
