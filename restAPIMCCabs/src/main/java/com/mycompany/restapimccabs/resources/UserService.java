@@ -7,6 +7,8 @@ package com.mycompany.restapimccabs.resources;
 import com.google.gson.Gson;
 import User.Users;
 import User.UsersCRUD;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -57,6 +59,23 @@ public class UserService {
                 .entity("{\"message\": \"Failed to update user\"}")
                 .build();
     }
+    @PUT
+@Path("/{id}/role")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+public Response updateUserRole(@PathParam("id") int id, String json) {
+    JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
+    String newRole = jsonObject.get("uRole").getAsString();
+
+    int rowsUpdated = UsersCRUD.updateUserRole(id, newRole);
+    if (rowsUpdated > 0) {
+        return Response.ok("{\"message\": \"User role updated successfully\"}").build();
+    }
+    return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+            .entity("{\"message\": \"Failed to update user role\"}")
+            .build();
+}
+
 
     @DELETE
     @Path("/{id}")

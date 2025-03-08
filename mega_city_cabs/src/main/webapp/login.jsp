@@ -14,6 +14,7 @@
         <title>Login - Mega City Cabs</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="./css/login.css">
+        <link rel="icon" type="image/svg+xml" href="./images/favicon.svg">
     </head>
     <body class="d-flex align-items-center vh-100 bg-dark">
 

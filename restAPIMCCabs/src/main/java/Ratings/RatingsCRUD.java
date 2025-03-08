@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Ratings;
 
 import java.math.BigDecimal;
@@ -11,6 +7,7 @@ import java.util.List;
 import DBConnection.ConnectionHelper;
 
 public class RatingsCRUD {
+    
     public static int addRating(Ratings rating) {
         String query = "INSERT INTO ratings (userId, reservationId, tripRating, vehicleRating, driverRating, comment) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectionHelper.getConnection();
@@ -34,21 +31,21 @@ public class RatingsCRUD {
 
     public static List<Ratings> getRatings() {
         List<Ratings> ratings = new ArrayList<>();
-        String query = "SELECT *, (tripRating + vehicleRating + driverRating) / 3 AS overalRating FROM ratings";
+        String query = "SELECT * FROM ratings";  // 🔹 Removed `overalRating` from SQL, using Java instead
         try (Connection conn = ConnectionHelper.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
-                ratings.add(new Ratings(
+                Ratings rating = new Ratings(
                         rs.getInt("id"),
                         rs.getInt("userId"),
                         rs.getInt("reservationId"),
                         rs.getBigDecimal("tripRating"),
                         rs.getBigDecimal("vehicleRating"),
                         rs.getBigDecimal("driverRating"),
-                        rs.getBigDecimal("overalRating"),
                         rs.getString("comment")
-                ));
+                );
+                ratings.add(rating);
             }
         } catch (SQLException e) {
             e.printStackTrace();

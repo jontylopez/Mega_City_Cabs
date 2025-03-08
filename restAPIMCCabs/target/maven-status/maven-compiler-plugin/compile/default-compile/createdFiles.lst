@@ -3,6 +3,7 @@ com\mycompany\restapimccabs\resources\RatingsService.class
 DriverAvailability\DriverAvailability.class
 Category\Category.class
 Vehicle\VehiclesCRUD.class
+DiscountAvailability\DiscountAvailabilityCRUD.class
 DriverAvailability\DriverAvailabilityCRUD.class
 Reservation\Reservations.class
 com\mycompany\restapimccabs\resources\JointService.class
@@ -11,14 +12,19 @@ DateAdapter\SqlDateAdapter.class
 Driver\DriversCRUD.class
 com\mycompany\restapimccabs\resources\JointService$ReservationRequest.class
 com\mycompany\restapimccabs\resources\CategoryService.class
+Discount\DiscountsCRUD.class
 Reservation\ReservationsCRUD.class
 DBConnection\passwordHashing.class
+DiscountAvailability\DiscountAvailability.class
 Ratings\RatingsCRUD.class
 User\UsersCRUD.class
+Discount\Discounts.class
 Category\CategoryCRUD.class
 com\mycompany\restapimccabs\resources\ReservationService.class
 com\mycompany\restapimccabs\resources\VehicleAvailabilityService.class
+com\mycompany\restapimccabs\resources\DiscountService.class
 com\mycompany\restapimccabs\resources\VehicleService.class
+com\mycompany\restapimccabs\resources\DiscountAvailabilityService.class
 com\mycompany\restapimccabs\resources\UserService.class
 DBConnection\ConnectionHelper.class
 User\Users.class

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.restapimccabs.resources;
 
 import com.google.gson.Gson;
@@ -39,6 +35,12 @@ public class RatingsService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRatings() {
         List<Ratings> ratings = ratingsCRUD.getRatings();
+
+        // ✅ Compute Overall Rating for each rating and include it in response
+        ratings.forEach(rating -> {
+            rating.setComment(rating.getComment() + " | Overall Rating: " + rating.getOverallRating());
+        });
+
         return Response.ok(gson.toJson(ratings)).build();
     }
 

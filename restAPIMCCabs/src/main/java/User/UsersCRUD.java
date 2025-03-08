@@ -78,6 +78,20 @@ public class UsersCRUD {
         return -1;
     }
 
+    public static int updateUserRole(int id, String newRole) {
+    String query = "UPDATE users SET uRole=? WHERE id=?";
+    try (Connection conn = ConnectionHelper.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+        stmt.setString(1, newRole);
+        stmt.setInt(2, id);
+
+        return stmt.executeUpdate();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return -1;
+}
+
     public static int deleteUser(int id) {
         String query = "DELETE FROM users WHERE id=?";
         try (Connection conn = ConnectionHelper.getConnection();

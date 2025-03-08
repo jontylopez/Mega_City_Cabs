@@ -20,44 +20,54 @@ function loadPage(url) {
     currentPage = url;
 
     fetch(url)
-        .then(response => response.text())
-        .then(html => {
-            document.querySelector(".main-content").innerHTML = html;
-            setupLinks(); // Ensure links are clickable
+            .then(response => response.text())
+            .then(html => {
+                document.querySelector(".main-content").innerHTML = html;
+                setupLinks(); // Ensure links are clickable
 
-            console.log("✅ Page Loaded: ", url);
+                console.log("✅ Page Loaded: ", url);
 
-            // ✅ Handle Category Manager
-            if (url.includes("categoryManager.jsp")) {
-                console.log("📌 Category Manager Loaded! Fetching categories...");
-                updateCategoryTable();
+                // ✅ Handle Category Manager
+                if (url.includes("categoryManager.jsp")) {
+                    console.log("📌 Category Manager Loaded! Fetching categories...");
+                    updateCategoryTable();
 
-                // ✅ Ensure Category Form works
-                setupForm("categoryForm", createCategory);
-            }
+                    // ✅ Ensure Category Form works
+                    setupForm("categoryForm", createCategory);
+                }
 
-            // ✅ Handle Vehicle Manager
-            if (url.includes("vehicleManager.jsp")) {
-                console.log("📌 Vehicle Manager Loaded! Fetching vehicles...");
-                updateVehicleTable();
+                // ✅ Handle Vehicle Manager
+                if (url.includes("vehicleManager.jsp")) {
+                    console.log("📌 Vehicle Manager Loaded! Fetching vehicles...");
+                    updateVehicleTable();
 
-                // ✅ Populate category dropdowns
-                updateCategoryDropdowns();
+                    // ✅ Populate category dropdowns
+                    updateCategoryDropdowns();
 
-                // ✅ Ensure Vehicle Form works
-                setupForm("vehicleForm", createVehicle);
-            }
+                    // ✅ Ensure Vehicle Form works
+                    setupForm("vehicleForm", createVehicle);
+                }
 
-            // ✅ Handle Driver Manager
-            if (url.includes("driverManager.jsp")) {
-                console.log("📌 Driver Manager Loaded! Fetching drivers...");
-                updateDriverTable();
+                // ✅ Handle Driver Manager
+                if (url.includes("driverManager.jsp")) {
+                    console.log("📌 Driver Manager Loaded! Fetching drivers...");
+                    updateDriverTable();
 
-                // ✅ Ensure Driver Form works
-                setupForm("driverForm", createDriver);
-            }
-        })
-        .catch(error => console.error("❌ Error loading page:", error));
+                    // ✅ Ensure Driver Form works
+                    setupForm("driverForm", createDriver);
+                }
+                if (url.includes("discountManager.jsp")) {
+                    console.log("📌 Discount Manager Loaded! Fetching Discounts...");
+                    loadDiscounts();
+                    setTimeout(loadDiscounts, 500); // ✅ Add delay to ensure table is loaded
+                }
+                if (url.includes("userManager.jsp")) {
+                    console.log("📌 User Manager Loaded! Fetching Users...");
+                    loadUsers();
+
+                }
+            })
+            .catch(error => console.error("❌ Error loading page:", error));
 }
 
 /**
@@ -103,7 +113,8 @@ async function getCategories() {
 
     try {
         const response = await fetch(categoryApiUrl);
-        if (!response.ok) throw new Error(`❌ HTTP Error: ${response.status}`);
+        if (!response.ok)
+            throw new Error(`❌ HTTP Error: ${response.status}`);
 
         const categories = await response.json();
         console.log("✅ API Response Data:", categories);
@@ -173,7 +184,7 @@ async function createCategory() {
     try {
         const response = await fetch(categoryApiUrl + "/create", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(category)
         });
 
@@ -211,8 +222,9 @@ function editCategory(id, catName, maxPsngr, perDayValue, maxKmPerDay, milePkg1,
 }
 
 // 🔹 Update a Category
-async function submitUpdate(event = null) {  
-    if (event) event.preventDefault();  
+async function submitUpdate(event = null) {
+    if (event)
+        event.preventDefault();
 
     const id = document.getElementById("updateCategoryId").value;
     const updatedCategory = {
@@ -230,12 +242,12 @@ async function submitUpdate(event = null) {
         active: document.getElementById("updateActive").value
     };
 
-    console.log("📌 Sending Update Request:", updatedCategory); 
+    console.log("📌 Sending Update Request:", updatedCategory);
 
     try {
         const response = await fetch(`${categoryApiUrl}/${id}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(updatedCategory)
         });
 
@@ -248,7 +260,7 @@ async function submitUpdate(event = null) {
         }
     } catch (error) {
         console.error("🚨 Fetch Error:", error);
-    }
+}
 }
 
 // 🔹 Cancel Update
@@ -260,7 +272,7 @@ function cancelUpdate() {
 async function deleteCategory(id) {
     if (confirm("Are you sure you want to delete this category?")) {
         try {
-            const response = await fetch(`${categoryApiUrl}/${id}`, { method: "DELETE" });
+            const response = await fetch(`${categoryApiUrl}/${id}`, {method: "DELETE"});
 
             if (response.ok) {
                 alert("✅ Category Deleted Successfully!");
@@ -274,24 +286,6 @@ async function deleteCategory(id) {
     }
 }
 
-// Ensure categories are loaded when the page is dynamically inserted
-document.addEventListener("DOMContentLoaded", function () {
-    if (window.location.href.includes("categoryManager.jsp")) {
-        getCategories();
-    }
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-    const vehicleForm = document.getElementById("vehicleForm");
-    if (vehicleForm) {
-        vehicleForm.addEventListener("submit", function (event) {
-            event.preventDefault(); // ✅ Prevent form refresh
-            createVehicle(event);
-        });
-    }
-});
-
-
 // ==========================================
 // 🔹 VEHICLE MANAGEMENT FUNCTIONS
 // ==========================================
@@ -301,19 +295,22 @@ const vehicleApiUrl = "http://localhost:8080/restAPIMCCabs/api/vehicles";
  * ✅ Utility Function: Format date to YYYY-MM-DD
  */
 function formatDate(dateString) {
-    if (!dateString) return null;
+    if (!dateString)
+        return null;
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return null;
-    return date.toISOString().split("T")[0]; 
+    if (isNaN(date.getTime()))
+        return null;
+    return date.toISOString().split("T")[0];
 }
 
 // 🔹 Fetch Vehicle Data
 async function getVehicles() {
     console.log("📌 Fetching vehicles...");
-    
+
     try {
         const response = await fetch(vehicleApiUrl);
-        if (!response.ok) throw new Error(`❌ HTTP Error: ${response.status}`);
+        if (!response.ok)
+            throw new Error(`❌ HTTP Error: ${response.status}`);
 
         const vehicles = await response.json();
         console.log("✅ API Response Data:", vehicles);
@@ -360,14 +357,6 @@ async function updateVehicleTable() {
     console.log("✅ Vehicle Table Updated with Category Names!");
 }
 
-
-/**
- * ✅ Create a New Vehicle
- */
-// 🔹 Fetch and Display Categories (for Add & Update Vehicle Forms)
-
-
-// 🔹 Update Category Dropdowns
 // 🔹 Update Category Dropdowns
 async function updateCategoryDropdowns() {
     const categories = await getCategories(); // Fetch categories
@@ -381,7 +370,8 @@ async function updateCategoryDropdowns() {
 // 🔹 Helper Function to Populate Dropdowns
 function populateDropdown(dropdownId, categories) {
     const dropdown = document.getElementById(dropdownId);
-    if (!dropdown) return;
+    if (!dropdown)
+        return;
 
     dropdown.innerHTML = `<option value="" disabled selected>Select a Category</option>`;
 
@@ -392,7 +382,8 @@ function populateDropdown(dropdownId, categories) {
 }
 
 async function createVehicle(event) {
-    if (event) event.preventDefault();
+    if (event)
+        event.preventDefault();
 
     const categorySelect = document.getElementById("vehicleCategory");
     const catId = parseInt(categorySelect.value);
@@ -409,7 +400,7 @@ async function createVehicle(event) {
     try {
         const response = await fetch(vehicleApiUrl + "/create", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(vehicle)
         });
 
@@ -457,8 +448,9 @@ function editVehicle(id, catId, vehicleNo, regExpDate, stat) {
 /**
  * ✅ Update a Vehicle
  */
-async function submitVehicleUpdate(event) {  
-    if (event) event.preventDefault();
+async function submitVehicleUpdate(event) {
+    if (event)
+        event.preventDefault();
 
     const id = document.getElementById("updateVehicleId").value;
     const updatedVehicle = {
@@ -474,11 +466,12 @@ async function submitVehicleUpdate(event) {
     try {
         const response = await fetch(`${vehicleApiUrl}/${id}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(updatedVehicle)
         });
 
-        if (!response.ok) throw new Error(`❌ HTTP Error: ${response.status}`);
+        if (!response.ok)
+            throw new Error(`❌ HTTP Error: ${response.status}`);
 
         const responseData = await response.json();
         console.log("✅ API Response:", responseData);
@@ -507,7 +500,8 @@ async function deleteVehicle(id) {
                 method: "DELETE"
             });
 
-            if (!response.ok) throw new Error(`❌ HTTP Error: ${response.status}`);
+            if (!response.ok)
+                throw new Error(`❌ HTTP Error: ${response.status}`);
             alert("✅ Deleted");
             updateVehicleTable(); // Refresh vehicle list
         } catch (error) {
@@ -516,13 +510,15 @@ async function deleteVehicle(id) {
     }
 }
 
-// ✅ Ensure vehicles load on page load
 document.addEventListener("DOMContentLoaded", function () {
-    if (window.location.href.includes("vehicleManager.jsp")) {
-       updateVehicleTable();
+    const vehicleForm = document.getElementById("vehicleForm");
+    if (vehicleForm) {
+        vehicleForm.addEventListener("submit", function (event) {
+            event.preventDefault(); // ✅ Prevent form refresh
+            createVehicle(event);
+        });
     }
 });
-
 
 // ==========================================
 // 🔹 DRIVER MANAGEMENT FUNCTIONS
@@ -537,7 +533,8 @@ async function getDrivers() {
 
     try {
         const response = await fetch(driverApiUrl);
-        if (!response.ok) throw new Error(`❌ HTTP Error: ${response.status}`);
+        if (!response.ok)
+            throw new Error(`❌ HTTP Error: ${response.status}`);
 
         const drivers = await response.json();
         console.log("✅ API Response Data:", drivers);
@@ -602,7 +599,7 @@ async function createDriver() {
     try {
         const response = await fetch(driverApiUrl + "/create", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(driver)
         });
 
@@ -663,11 +660,12 @@ async function submitDriverUpdate() {
     try {
         const response = await fetch(`${driverApiUrl}/${id}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(updatedDriver)
         });
 
-        if (!response.ok) throw new Error(`❌ HTTP Error: ${response.status}`);
+        if (!response.ok)
+            throw new Error(`❌ HTTP Error: ${response.status}`);
 
         const responseData = await response.json();
         console.log("✅ API Response:", responseData);
@@ -696,7 +694,8 @@ async function deleteDriver(id) {
                 method: "DELETE"
             });
 
-            if (!response.ok) throw new Error(`❌ HTTP Error: ${response.status}`);
+            if (!response.ok)
+                throw new Error(`❌ HTTP Error: ${response.status}`);
             alert("✅ Deleted");
             updateDriverTable(); // Refresh driver list
         } catch (error) {
@@ -705,9 +704,318 @@ async function deleteDriver(id) {
     }
 }
 
-// ✅ Ensure drivers load on page load
-document.addEventListener("DOMContentLoaded", function () {
-    if (window.location.href.includes("driverManager.jsp")) {
-        updateDriverTable();
+// ==========================================
+// 🔹 DISCOUNT MANAGEMENT FUNCTIONS
+// ==========================================
+
+// 🔹 Fetch and Load Discounts (Both Active & Expired)
+async function loadDiscounts() {
+    console.log("📌 Fetching Discounts...");
+
+    try {
+        const response = await fetch("http://localhost:8080/restAPIMCCabs/api/discounts/active");
+        if (!response.ok)
+            throw new Error(`❌ HTTP Error: ${response.status}`);
+
+        const discounts = await response.json();
+        console.log("✅ API Response Data:", discounts);
+
+        const tableBody = document.getElementById("discountTableBody");
+
+        // 🔹 Check if the element exists before updating
+        if (!tableBody) {
+            console.error("❌ Element 'discountTableBody' not found! Make sure the ID is correct in the HTML.");
+            return;
+        }
+
+        tableBody.innerHTML = ""; // ✅ Clear existing data
+
+        discounts.forEach(discount => {
+            const row = `
+            <tr>
+            <td>${discount.id}</td>
+                <td>${discount.diskId}</td>
+                <td>${discount.percentage}%</td>
+                <td>${discount.startDate}</td>
+                <td>${discount.endDate}</td>
+                <td><span class="badge bg-${discount.dStatus === "Active" ? "success" : "danger"}">${discount.dStatus}</span></td>
+                <td>
+                    <button class="btn btn-warning btn-sm" onclick="editDiscount(${discount.id}, '${discount.diskId}', ${discount.percentage}, '${discount.startDate}', '${discount.endDate}', '${discount.dStatus}')">
+                        <i class="bi bi-pencil"></i> Edit
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteDiscount(${discount.id})">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </td>
+            </tr>`;
+            tableBody.innerHTML += row;
+        });
+
+        console.log("✅ Discounts Table Updated!");
+    } catch (error) {
+        console.error("🚨 Fetch Error:", error);
     }
-});
+
+    // 🔹 Load Expired Discounts Separately
+    loadExpiredDiscounts();
+}
+
+// 🔹 Fetch and Load Expired Discounts
+async function loadExpiredDiscounts() {
+    console.log("📌 Fetching Expired Discounts...");
+
+    try {
+        const response = await fetch("http://localhost:8080/restAPIMCCabs/api/discounts/expired");
+        if (!response.ok)
+            throw new Error(`❌ HTTP Error: ${response.status}`);
+
+        const expiredDiscounts = await response.json();
+        console.log("✅ Expired Discounts Data:", expiredDiscounts);
+
+        const expiredTableBody = document.getElementById("expiredDiscountTable");
+
+        if (!expiredTableBody) {
+            console.error("❌ Element 'expiredDiscountTable' not found! Ensure ID matches in HTML.");
+            return;
+        }
+
+        expiredTableBody.innerHTML = ""; // ✅ Clear previous data
+
+        expiredDiscounts.forEach(discount => {
+            const row = `
+            <tr>
+                <td>${discount.id}</td>
+                <td>${discount.diskId}</td>
+                <td>${discount.percentage}%</td>
+                <td>${discount.startDate}</td>
+                <td>${discount.endDate}</td>
+                <td><span class="badge bg-danger">Inactive</span></td>
+            </tr>`;
+            expiredTableBody.innerHTML += row;
+        });
+
+        console.log("✅ Expired Discounts Table Updated!");
+    } catch (error) {
+        console.error("🚨 Fetch Error:", error);
+    }
+}
+// 🔹 Add New Discount
+async function addDiscount() {
+    const percentage = document.getElementById("discountPercentage").value;
+    const startDate = document.getElementById("startDate").value;
+    const endDate = document.getElementById("endDate").value;
+    const dStatus = document.getElementById("discountStatus").value;
+
+    if (!percentage || !startDate || !endDate) {
+        alert("❌ Please fill in all fields!");
+        return;
+    }
+
+    const discountData = {percentage, startDate, endDate, dStatus};
+
+    try {
+        const response = await fetch("http://localhost:8080/restAPIMCCabs/api/discounts/create", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(discountData),
+        });
+
+        if (!response.ok)
+            throw new Error("❌ Failed to create discount!");
+
+        alert("✅ Discount Added Successfully!");
+
+        // ✅ Reset form fields
+        document.getElementById("discountPercentage").value = "";
+        document.getElementById("startDate").value = "";
+        document.getElementById("endDate").value = "";
+        document.getElementById("discountStatus").value = "Active";
+
+        // ✅ Reload discount tables
+        loadDiscounts();
+
+    } catch (error) {
+        console.error("🚨 Error Adding Discount:", error);
+    }
+}
+// 🔹 Edit Discount
+// ✅ Edit Discount (Show Update Form)
+function editDiscount(id, diskId, percentage, startDate, endDate, dStatus) {
+    document.getElementById("updateDiscountId").value = id;
+    document.getElementById("updateDiscountPercentage").value = percentage;
+    document.getElementById("updateStartDate").value = startDate;
+    document.getElementById("updateEndDate").value = endDate;
+
+    // ✅ Show the Update Discount Form and Scroll to It
+    document.getElementById("updateDiscountForm").style.display = "block";
+    document.getElementById("updateDiscountForm").scrollIntoView({behavior: "smooth"});
+}
+// ✅ Submit Discount Update
+async function submitDiscountUpdate() {
+    const id = document.getElementById("updateDiscountId").value;
+    const percentage = document.getElementById("updateDiscountPercentage").value;
+    const startDate = document.getElementById("updateStartDate").value;
+    const endDate = document.getElementById("updateEndDate").value;
+    const dStatus = "Active"; // ✅ Always set status to Active
+
+    if (!percentage || !startDate || !endDate) {
+        alert("❌ Please fill in all fields!");
+        return;
+    }
+
+    const discountData = {percentage, startDate, endDate, dStatus}; // ✅ Include dStatus
+
+    try {
+        const response = await fetch(`http://localhost:8080/restAPIMCCabs/api/discounts/${id}`, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(discountData),
+        });
+
+        if (!response.ok)
+            throw new Error("❌ Failed to update discount!");
+
+        alert("✅ Discount Updated Successfully!");
+
+        // ✅ Hide and Reset Update Form
+        cancelDiscountUpdate();
+
+        // ✅ Refresh Discount Table
+        loadDiscounts();
+    } catch (error) {
+        console.error("🚨 Error Updating Discount:", error);
+    }
+}
+
+// ✅ Cancel Discount Update
+function cancelDiscountUpdate() {
+    document.getElementById("updateDiscountForm").style.display = "none";
+
+    // ✅ Reset fields
+    document.getElementById("updateDiscountId").value = "";
+    document.getElementById("updateDiscountPercentage").value = "";
+    document.getElementById("updateStartDate").value = "";
+    document.getElementById("updateEndDate").value = "";
+}
+
+// 🔹 Delete Discount
+async function deleteDiscount(id) {
+    if (!confirm("❌ Are you sure you want to delete this discount?"))
+        return;
+
+    try {
+        const response = await fetch(`http://localhost:8080/restAPIMCCabs/api/discounts/${id}`, {
+            method: "DELETE",
+        });
+
+        if (!response.ok)
+            throw new Error("❌ Failed to delete discount!");
+
+        alert("✅ Discount Deleted Successfully!");
+        loadDiscounts(); // Refresh the table
+
+    } catch (error) {
+        console.error("🚨 Error Deleting Discount:", error);
+    }
+}
+
+
+// ==========================================
+// 🔹 USER MANAGEMENT FUNCTIONS
+// ==========================================
+// ✅ Fetch and Display Users
+async function loadUsers() {
+    console.log("📌 Fetching users...");
+
+    try {
+        const response = await fetch("http://localhost:8080/restAPIMCCabs/api/users");
+        if (!response.ok) throw new Error(`❌ HTTP Error: ${response.status}`);
+
+        const users = await response.json();
+        console.log("✅ Retrieved Users:", users);
+
+        const tableBody = document.getElementById("userTableBody");
+        tableBody.innerHTML = "";
+
+        users.forEach(user => {
+            const row = `
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${user.fullName}</td>
+                    <td>${user.email}</td>
+                    <td>${user.phone}</td>
+                    <td><span class="badge bg-${user.uRole === 'adm' ? 'primary' : 'success'}">${user.uRole === 'adm' ? 'Admin' : 'Customer'}</span></td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editUser(${user.id}, '${user.fullName}', '${user.email}', '${user.uRole}')">
+                            <i class="bi bi-pencil"></i> Edit
+                        </button>
+                        ${user.uRole === 'adm' ? '' : `<button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>`}
+                    </td>
+                </tr>`;
+            tableBody.innerHTML += row;
+        });
+
+    } catch (error) {
+        console.error("🚨 Fetch Error:", error);
+    }
+}
+
+// ✅ Open Edit User Modal
+function editUser(id, fullName, email, uRole) {
+    document.getElementById("editUserId").value = id;
+    document.getElementById("editFullName").value = fullName;
+    document.getElementById("editEmail").value = email;
+    document.getElementById("editUserRole").value = uRole;
+
+    const modal = new bootstrap.Modal(document.getElementById("editUserModal"));
+    modal.show();
+}
+
+// ✅ Update User Role (New Optimized API)
+async function updateUserRole() {
+    const id = document.getElementById("editUserId").value;
+    const newRole = document.getElementById("editUserRole").value;
+
+    try {
+        const response = await fetch(`http://localhost:8080/restAPIMCCabs/api/users/${id}/role`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ uRole: newRole }),
+        });
+
+        if (!response.ok) throw new Error("❌ Failed to update user role!");
+
+        alert("✅ User role updated successfully!");
+        loadUsers(); // Refresh user list
+        const modal = bootstrap.Modal.getInstance(document.getElementById("editUserModal"));
+        modal.hide(); // Close modal
+
+    } catch (error) {
+        console.error("🚨 Error Updating Role:", error);
+    }
+}
+
+// ✅ Delete User
+async function deleteUser(id) {
+    if (!confirm("❌ Are you sure you want to delete this user?")) return;
+
+    try {
+        const response = await fetch(`http://localhost:8080/restAPIMCCabs/api/users/${id}`, { method: "DELETE" });
+
+        if (!response.ok) throw new Error("❌ Failed to delete user!");
+
+        alert("✅ User Deleted Successfully!");
+        loadUsers();
+
+    } catch (error) {
+        console.error("🚨 Error Deleting User:", error);
+    }
+}
+
+
+
+// ==========================================
+// 🔹 BOOKING MANAGEMENT FUNCTIONS
+// ==========================================

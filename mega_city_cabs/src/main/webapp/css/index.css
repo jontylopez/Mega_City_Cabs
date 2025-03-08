@@ -1,18 +1,9 @@
-/*
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
-*/
-/* 
-    Created on : Feb 6, 2025, 10:43:24 AM
-    Author     : Janith
-*/
-
 /* General Styles */
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    background: url('../images/bgImage.jpg') no-repeat center center fixed;
+    background: url('/mega_city_cabs/images/bgImage.jpg') no-repeat center center fixed;
     background-size: cover;
     color: white;
 }
@@ -106,7 +97,6 @@ body {
     justify-content: center;
     text-align: center;
     padding: 50px;
-    background: url('./images/bgImage.jpg') no-repeat center center/cover;
     position: relative;
 }
 

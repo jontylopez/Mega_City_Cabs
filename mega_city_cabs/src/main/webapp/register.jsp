@@ -13,7 +13,7 @@
         <title>Register - Mega City Cabs</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="./css/register.css">
-        <link rel="icon" href="data:,">
+        <link rel="icon" type="image/svg+xml" href="./images/favicon.svg">
     </head>
     <body class="d-flex align-items-center vh-100 my-50 bg-dark">
 

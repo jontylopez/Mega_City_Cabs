@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Ratings;
 
 import java.math.BigDecimal;
@@ -14,20 +10,19 @@ public class Ratings {
     private BigDecimal tripRating;
     private BigDecimal vehicleRating;
     private BigDecimal driverRating;
-    private BigDecimal overalRating;
     private String comment;
 
     public Ratings() {
     }
 
-    public Ratings(int id, int userId, int reservationId, BigDecimal tripRating, BigDecimal vehicleRating, BigDecimal driverRating, BigDecimal overalRating, String comment) {
+    public Ratings(int id, int userId, int reservationId, BigDecimal tripRating,
+                   BigDecimal vehicleRating, BigDecimal driverRating, String comment) {
         this.id = id;
         this.userId = userId;
         this.reservationId = reservationId;
         this.tripRating = tripRating;
         this.vehicleRating = vehicleRating;
         this.driverRating = driverRating;
-        this.overalRating = overalRating;
         this.comment = comment;
     }
 
@@ -80,19 +75,16 @@ public class Ratings {
         this.driverRating = driverRating;
     }
 
-    public BigDecimal getOveralRating() {
-        return overalRating;
-    }
-
-    public void setOveralRating(BigDecimal overalRating) {
-        this.overalRating = overalRating;
-    }
-
     public String getComment() {
         return comment;
     }
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    // ✅ Compute Overall Rating (Backend Calculation)
+    public BigDecimal getOverallRating() {
+        return tripRating.add(vehicleRating).add(driverRating).divide(BigDecimal.valueOf(3), 1, BigDecimal.ROUND_HALF_UP);
     }
 }
