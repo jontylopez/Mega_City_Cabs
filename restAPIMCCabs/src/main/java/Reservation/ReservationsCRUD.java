@@ -59,6 +59,37 @@ public class ReservationsCRUD {
         }
         return reservations;
     }
+    
+    // ✅ Fetch All Reservations for a User
+public List<Reservations> getReservationsByUserId(int userId) {
+        List<Reservations> reservations = new ArrayList<>();
+        String sql = "SELECT * FROM reservations WHERE userId = ?";
+        
+        try (Connection conn = ConnectionHelper.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Reservations reservation = new Reservations();
+                reservation.setId(rs.getInt("id"));
+                reservation.setUserId(rs.getInt("userId"));
+                reservation.setVehicleId(rs.getInt("vehicleId"));
+                reservation.setDriverId(rs.getInt("driverId"));
+                reservation.setStDate(rs.getDate("stDate"));
+                reservation.setEndDate(rs.getDate("endDate"));
+                reservation.setStTime(rs.getTime("stTime"));
+                reservation.setStLocation(rs.getString("stLocation"));
+                reservation.setStat(rs.getString("stat"));
+                reservation.setComments(rs.getString("comments"));
+
+                reservations.add(reservation);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return reservations;
+    }
 
     public static int updateReservation(Reservations reservation) {
         String query = "UPDATE reservations SET userId=?, vehicleId=?, driverId=?, stDate=?, endDate=?, stTime=?, stLocation=?, stat=?, comments=? WHERE id=?";

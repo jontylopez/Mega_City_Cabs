@@ -60,6 +60,32 @@ public class DriversCRUD {
         }
         return drivers;
     }
+    
+    // 🔹 Retrieve Driver by ID
+public static Drivers getDriverById(int id) {
+    String query = "SELECT * FROM drivers WHERE id=?";
+    try (Connection conn = ConnectionHelper.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+        stmt.setInt(1, id);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return new Drivers(
+                    rs.getInt("id"),
+                    rs.getString("dName"),
+                    rs.getString("dAddress"),
+                    rs.getString("dTel"),
+                    rs.getString("dLNum"),
+                    rs.getDate("dLExpDate"),
+                    rs.getString("stat")
+            );
+        }
+    } catch (SQLException e) {
+        System.err.println("🚨 SQL Error in getDriverById: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return null; // Return null if no driver is found
+}
+
 
     public static int updateDriver(Drivers driver) {
         String query = "UPDATE drivers SET dName=?, dAddress=?, dTel=?, dLNum=?, dLExpDate=?, stat=? WHERE id=?";

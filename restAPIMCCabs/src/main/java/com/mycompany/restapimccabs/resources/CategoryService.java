@@ -57,6 +57,19 @@ public Response addCategory(String json) {
         List<Category> categories = categoryCRUD.getCategories();
         return Response.ok(gson.toJson(categories)).build();
     }
+    
+    @GET
+@Path("/{id}")
+@Produces(MediaType.APPLICATION_JSON)
+public Response getCategoryById(@PathParam("id") int id) {
+    Category category = categoryCRUD.getCategoryById(id);
+    if (category == null) {
+        return Response.status(Response.Status.NOT_FOUND)
+                .entity("{\"message\": \"Category not found\"}")
+                .build();
+    }
+    return Response.ok(gson.toJson(category)).build();
+}
 
     @PUT
     @Path("/{id}")

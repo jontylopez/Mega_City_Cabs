@@ -14,6 +14,7 @@ import java.util.List;
 
 @Path("drivers")
 public class DriverService {
+
     private final DriversCRUD driversCRUD = new DriversCRUD();
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(Date.class, new SqlDateAdapter()) // ✅ Use Date Adapter
@@ -46,6 +47,19 @@ public class DriverService {
                     .build();
         }
         return Response.ok(gson.toJson(drivers)).build();
+    }
+
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDriverById(@PathParam("id") int id) {
+        Drivers driver = driversCRUD.getDriverById(id);
+        if (driver == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("{\"message\": \"Driver not found\"}")
+                    .build();
+        }
+        return Response.ok(gson.toJson(driver)).build();
     }
 
     @PUT

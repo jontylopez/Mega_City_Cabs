@@ -64,6 +64,34 @@ public class CategoryCRUD {
         return categories;
     }
 
+    // 🔹 Retrieve Category by ID
+    public static Category getCategoryById(int id) {
+        String query = "SELECT * FROM category WHERE id=?";
+        try (Connection conn = ConnectionHelper.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new Category(
+                        rs.getInt("id"),
+                        rs.getString("catName"),
+                        rs.getInt("maxPsngr"),
+                        rs.getBigDecimal("perDayValue"),
+                        rs.getInt("maxKmPerDay"),
+                        rs.getBigDecimal("milePkg1"),
+                        rs.getInt("pkg1Hrs"),
+                        rs.getBigDecimal("milePkg2"),
+                        rs.getInt("pkg2Hrs"),
+                        rs.getBigDecimal("waitingPerHr"),
+                        rs.getBigDecimal("extraKm"),
+                        rs.getString("active")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null; // Return null if no category is found
+    }
+
     // 🔹 Update a Category
     public static int updateCategory(Category category) {
         String query = "UPDATE category SET catName=?, maxPsngr=?, perDayValue=?, maxKmPerDay=?, milePkg1=?, pkg1Hrs=?, milePkg2=?, pkg2Hrs=?, waitingPerHr=?, extraKm=?, active=? WHERE id=?";

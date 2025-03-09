@@ -1,11 +1,17 @@
 document.addEventListener("DOMContentLoaded", function () {
     console.log("📌 Customer Dashboard Loaded!");
 
-    // ✅ Load Customer Pages Dynamically
+    // ✅ Load Default Customer Dashboard
     loadPage("customerDash.jsp");
 
-    // Attach event listeners
+    // ✅ Attach Sidebar Event Listeners
     setupLinks();
+
+    // ✅ Check if user is logged in and load trip details if on dashboard
+    const userId = getSessionUserId();
+    if (userId && window.location.href.includes("customerDash.jsp")) {
+        setTimeout(() => loadTripDetails(), 300); // Short delay to ensure elements exist
+    }
 });
 
 let currentPage = ""; // ✅ Track the currently loaded page
@@ -22,25 +28,33 @@ function loadPage(url) {
     fetch(url)
         .then(response => response.text())
         .then(html => {
-            document.querySelector(".main-content").innerHTML = html;
-            setupLinks(); // ✅ Reattach event listeners
+            const mainContent = document.querySelector(".main-content");
+            if (!mainContent) {
+                console.error("❌ Main content element not found!");
+                return;
+            }
+            
+            mainContent.innerHTML = html;
+            setupLinks(); // ✅ Ensure sidebar links are clickable
+
             console.log("✅ Page Loaded: ", url);
 
-            // ✅ Attach event listeners for booking buttons
+            // ✅ Load Next Trip for Customer Dashboard
+            if (url.includes("customerDash.jsp")) {
+                console.log("📌 Customer Dashboard Loaded! Fetching Next Trip...");
+                setTimeout(() => loadTripDetails(), 300); // Short delay to ensure elements exist
+            }
+
+            // ✅ Load Booking Page & Categories
             if (url.includes("bookRide.jsp")) {
-                console.log("📌 Booking Page Loaded! Fetching categories...");
+                console.log("📌 Booking Page Loaded! Fetching Categories...");
                 loadCategoriesForBooking();
+            }
 
-                // Attach event listeners for booking buttons
-                const perDayButton = document.getElementById("perDayButton");
-                const perMileageButton = document.getElementById("perMileageButton");
-
-                if (perDayButton) {
-                    perDayButton.addEventListener("click", showPerDayBooking);
-                }
-                if (perMileageButton) {
-                    perMileageButton.addEventListener("click", showPerMileageBooking);
-                }
+            // ✅ Load Booking History Page
+            if (url.includes("bookingHistory.jsp")) {
+                console.log("📌 Booking History Page Loaded! Fetching Trips...");
+                loadBookingHistory();
             }
         })
         .catch(error => console.error("❌ Error loading page:", error));
@@ -58,6 +72,7 @@ function setupLinks() {
         });
     });
 }
+
 
 // ==========================================
 // 🔹 CATEGORY MANAGEMENT FOR BOOKING PAGE
@@ -388,4 +403,185 @@ function getSessionUserId() {
         return null;
     }
     return parseInt(userId, 10); // Convert to integer for safety
+}
+// ==========================================
+// 🔹 FETCH NEXT TRIP FOR CUSTOMER DASHBOARD
+// ==========================================
+const reservationApiUrl = "http://localhost:8080/restAPIMCCabs/api/reservations/";
+const driverApiUrl = "http://localhost:8080/restAPIMCCabs/api/drivers/";
+
+/**
+ * ✅ Fetch & Display Next Trip for the Customer
+ */
+async function loadTripDetails(userId = null) {
+    // If userId is not provided, try to get it from session
+    if (!userId) {
+        userId = getSessionUserId();
+        if (!userId) {
+            console.error("🚨 User ID not found!");
+            return;
+        }
+    }
+
+    try {
+        console.log(`📌 Fetching reservations for user ID: ${userId}`);
+        const reservationResponse = await fetch(`${reservationApiUrl}${userId}`);
+        if (!reservationResponse.ok) throw new Error("🚨 Failed to fetch reservations");
+
+        const reservations = await reservationResponse.json();
+        console.log("✅ Fetched Reservations:", reservations);
+
+        if (reservations.length === 0) {
+            console.warn("⚠️ No reservations found!");
+            return;
+        }
+
+        // ✅ Get the upcoming trip
+        const today = new Date().toISOString().split("T")[0];
+        const upcomingTrips = reservations
+            .filter(trip => new Date(trip.stDate) >= new Date(today) && trip.stat !== "Cancelled")
+            .sort((a, b) => new Date(a.stDate) - new Date(b.stDate));
+
+        if (upcomingTrips.length === 0) {
+            console.warn("⚠️ No upcoming trips available!");
+            return;
+        }
+
+        const nextTrip = upcomingTrips[0]; // ✅ Get the closest trip
+        console.log("✅ Next Trip:", nextTrip);
+
+        // ✅ Fetch category and driver details
+        const [categoryResponse, driverResponse] = await Promise.all([
+            fetch(`${categoryApiUrl}/${nextTrip.id}`), 
+            nextTrip.driverId ? fetch(`${driverApiUrl}${nextTrip.driverId}`) : null
+        ]);
+
+        const categoryData = categoryResponse.ok ? await categoryResponse.json() : { catName: "Unknown Category" };
+        const driverData = driverResponse && driverResponse.ok ? await driverResponse.json() : { dName: "Not Assigned" };
+
+        console.log("✅ Category:", categoryData);
+        console.log("✅ Driver:", driverData);
+
+        // ✅ Populate the form with null checks for all elements
+        const elements = {
+            tripId: document.getElementById("tripId"),
+            tripStartDate: document.getElementById("tripStartDate"),
+            tripEndDate: document.getElementById("tripEndDate"),
+            tripStartTime: document.getElementById("tripStartTime"),
+            tripLocation: document.getElementById("tripLocation"),
+            tripVehicle: document.getElementById("tripVehicle"),
+            tripDriver: document.getElementById("tripDriver"),
+            tripStatus: document.getElementById("tripStatus")
+        };
+
+        if (elements.tripId) elements.tripId.value = nextTrip.id;
+        if (elements.tripStartDate) elements.tripStartDate.value = nextTrip.stDate;
+        if (elements.tripEndDate) elements.tripEndDate.value = nextTrip.endDate;
+        if (elements.tripStartTime) elements.tripStartTime.value = nextTrip.stTime || "N/A";
+        if (elements.tripLocation) elements.tripLocation.value = nextTrip.stLocation;
+        if (elements.tripVehicle) elements.tripVehicle.value = categoryData.catName;
+        if (elements.tripDriver) elements.tripDriver.value = driverData.dName;
+        if (elements.tripStatus) elements.tripStatus.value = nextTrip.stat;
+
+    } catch (error) {
+        console.error("🚨 Error loading trip details:", error);
+    }
+}
+
+/**
+ * ✅ Cancel an Upcoming Trip
+ */
+async function cancelTrip(tripId) {
+    if (!confirm("Are you sure you want to cancel this trip?")) return;
+
+    try {
+        const response = await fetch(`${reservationApiUrl}/cancel/${tripId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ stat: "Cancelled" }),
+        });
+
+        if (!response.ok) throw new Error("Failed to cancel the trip.");
+
+        alert("✅ Trip Cancelled Successfully!");
+        loadTripDetails(); // Fixed: Calling the correct function name
+    } catch (error) {
+        console.error("🚨 Error Cancelling Trip:", error);
+        alert("❌ Failed to cancel trip. Please try again.");
+    }
+}
+
+/**
+ * ✅ Load Booking History
+ */
+async function loadBookingHistory() {
+    console.log("📌 Fetching Booking History...");
+
+    const userId = getSessionUserId();
+    if (!userId) return;
+
+    try {
+        const response = await fetch(`${reservationApiUrl}${userId}`);
+        if (!response.ok) throw new Error(`❌ Server Error: ${response.status}`);
+
+        let reservations = await response.json();
+        console.log("✅ Fetched Booking History:", reservations);
+
+        // ✅ Update UI with booking history
+        const bookingHistoryTable = document.getElementById("bookingHistoryTable");
+        if (!bookingHistoryTable) {
+            console.error("❌ Booking history table not found!");
+            return;
+        }
+        
+        // Clear previous content
+        bookingHistoryTable.innerHTML = "";
+        
+        // Check if we have reservations
+        if (reservations.length === 0) {
+            bookingHistoryTable.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center">No booking history found.</td>
+                </tr>`;
+            return;
+        }
+        
+        // Sort by start date, newest first
+        reservations.sort((a, b) => new Date(b.stDate) - new Date(a.stDate));
+        
+        // Create rows for each reservation
+        reservations.forEach(reservation => {
+            const row = document.createElement("tr");
+            
+            // Format date
+            const formattedStartDate = new Date(reservation.stDate).toLocaleDateString();
+            
+            row.innerHTML = `
+                <td>${reservation.id}</td>
+                <td>${formattedStartDate}</td>
+                <td>${reservation.stTime || "N/A"}</td>
+                <td>${reservation.stLocation || "N/A"}</td>
+                <td>${reservation.vehicleId || "Not Assigned"}</td>
+                <td>${reservation.driverId || "Not Assigned"}</td>
+                <td><span class="status-badge ${reservation.stat.toLowerCase()}">${reservation.stat}</span></td>
+                <td>
+                    ${reservation.stat !== "Cancelled" && reservation.stat !== "Completed" ? 
+                        `<button class="btn btn-sm btn-danger" onclick="cancelTrip(${reservation.id})">Cancel</button>` : 
+                        ""}
+                </td>
+            `;
+            
+            bookingHistoryTable.appendChild(row);
+        });
+
+    } catch (error) {
+        console.error("🚨 Error Fetching Booking History:", error);
+        const bookingHistoryTable = document.getElementById("bookingHistoryTable");
+        if (bookingHistoryTable) {
+            bookingHistoryTable.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center">Error loading booking history. Please try again later.</td>
+                </tr>`;
+        }
+    }
 }
