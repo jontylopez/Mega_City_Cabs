@@ -1,7 +1,9 @@
 package com.mycompany.restapimccabs.resources;
 
 import JointOperation.JointOperations;
+import Discount.Discounts;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -28,6 +30,13 @@ public class JointService {
 
         List<Integer> availableVehicles = jointOperations.getAvailableVehicles(
                 categoryId, Date.valueOf(startDate), Date.valueOf(endDate));
+
+        JsonObject responseJson = new JsonObject();
+        if (availableVehicles.isEmpty()) {
+            responseJson.addProperty("message", "No available vehicles found.");
+            return Response.status(Response.Status.NOT_FOUND).entity(gson.toJson(responseJson)).build();
+        }
+        
         return Response.ok(gson.toJson(availableVehicles)).build();
     }
 
@@ -43,7 +52,32 @@ public class JointService {
 
         List<Integer> availableDrivers = jointOperations.getAvailableDrivers(
                 Date.valueOf(startDate), Date.valueOf(endDate));
+
+        JsonObject responseJson = new JsonObject();
+        if (availableDrivers.isEmpty()) {
+            responseJson.addProperty("message", "No available drivers found.");
+            return Response.status(Response.Status.NOT_FOUND).entity(gson.toJson(responseJson)).build();
+        }
+        
         return Response.ok(gson.toJson(availableDrivers)).build();
+    }
+
+    /**
+     * ✅ Get Available Discounts for a User
+     */
+    @GET
+    @Path("/availableDiscounts/{userId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAvailableDiscounts(@PathParam("userId") int userId) {
+        List<Discounts> availableDiscounts = jointOperations.getAvailableDiscounts(userId);
+
+        JsonObject responseJson = new JsonObject();
+        if (availableDiscounts.isEmpty()) {
+            responseJson.addProperty("message", "No active discounts available.");
+            return Response.status(Response.Status.NOT_FOUND).entity(gson.toJson(responseJson)).build();
+        }
+
+        return Response.ok(gson.toJson(availableDiscounts)).build();
     }
 
     /**
@@ -57,29 +91,39 @@ public class JointService {
         try {
             ReservationRequest request = gson.fromJson(json, ReservationRequest.class);
 
+            // ✅ Validate Inputs
+            if (request.userId == 0 || request.categoryId == 0 || request.startDate == null || request.startTime == null || request.startLocation == null) {
+                JsonObject responseJson = new JsonObject();
+                responseJson.addProperty("message", "Invalid reservation request. Please provide all required fields.");
+                return Response.status(Response.Status.BAD_REQUEST).entity(gson.toJson(responseJson)).build();
+            }
+
+            // ✅ Create reservation
             int reservationId = jointOperations.createReservation(
                     request.userId,
                     request.categoryId,
                     Date.valueOf(request.startDate),
                     Date.valueOf(request.endDate),
                     Time.valueOf(request.startTime),
-                    request.startLocation
+                    request.startLocation,
+                    request.dissId, // ✅ Apply discount if available
+                    request.finalPrice // ✅ Store final price
             );
 
+            JsonObject responseJson = new JsonObject();
             if (reservationId > 0) {
-                return Response.status(Response.Status.CREATED)
-                        .entity("{\"message\": \"Reservation created successfully\", \"reservationId\": " + reservationId + "}")
-                        .build();
+                responseJson.addProperty("message", "Reservation created successfully.");
+                responseJson.addProperty("reservationId", reservationId);
+                return Response.status(Response.Status.CREATED).entity(gson.toJson(responseJson)).build();
             } else {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("{\"message\": \"No available vehicles for the selected dates\"}")
-                        .build();
+                responseJson.addProperty("message", "No available vehicles for the selected dates.");
+                return Response.status(Response.Status.BAD_REQUEST).entity(gson.toJson(responseJson)).build();
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"message\": \"Server error while processing the request\"}")
-                    .build();
+            JsonObject responseJson = new JsonObject();
+            responseJson.addProperty("message", "Server error while processing the request.");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(responseJson)).build();
         }
     }
 
@@ -93,5 +137,7 @@ public class JointService {
         String endDate;
         String startTime;
         String startLocation;
+        Integer dissId; // ✅ Optional Discount ID
+        Double finalPrice; // ✅ Optional Final Price
     }
 }

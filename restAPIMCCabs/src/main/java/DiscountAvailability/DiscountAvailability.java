@@ -9,15 +9,15 @@ import java.sql.Timestamp;
 public class DiscountAvailability {
     private int id;
     private int userId;
-    private int discountId;
+    private int dissId;
     private Timestamp usedAt;
 
     public DiscountAvailability() {}
 
-    public DiscountAvailability(int id, int userId, int discountId, Timestamp usedAt) {
+    public DiscountAvailability(int id, int userId, int dissId, Timestamp usedAt) {
         this.id = id;
         this.userId = userId;
-        this.discountId = discountId;
+        this.dissId = dissId;
         this.usedAt = usedAt;
     }
 
@@ -38,11 +38,11 @@ public class DiscountAvailability {
     }
 
     public int getDiscountId() {
-        return discountId;
+        return dissId;
     }
 
     public void setDiscountId(int discountId) {
-        this.discountId = discountId;
+        this.dissId = discountId;
     }
 
     public Timestamp getUsedAt() {

@@ -10,7 +10,7 @@ public class DriverAvailability {
     private int driverId;
 
     @JsonAdapter(SqlDateAdapter.class)
-    private Date startDate;
+    private Date stDate;
 
     @JsonAdapter(SqlDateAdapter.class)
     private Date endDate;
@@ -18,10 +18,10 @@ public class DriverAvailability {
     public DriverAvailability() {
     }
 
-    public DriverAvailability(int id, int driverId, Date startDate, Date endDate) {
+    public DriverAvailability(int id, int driverId, Date stDate, Date endDate) {
         this.id = id;
         this.driverId = driverId;
-        this.startDate = startDate;
+        this.stDate = stDate;
         this.endDate = endDate;
     }
 
@@ -43,11 +43,11 @@ public class DriverAvailability {
     }
 
     public Date getStartDate() {
-        return startDate;
+        return stDate;
     }
 
     public void setStartDate(Date startDate) {
-        this.startDate = startDate;
+        this.stDate = startDate;
     }
 
     public Date getEndDate() {

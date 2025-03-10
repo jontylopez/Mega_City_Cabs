@@ -58,6 +58,19 @@ public class DiscountService {
         return Response.ok(gson.toJson(expiredDiscounts)).build();
     }
 
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDiscountById(@PathParam("id") int id) {
+        Discounts discount = discountCRUD.getDiscountById(id);
+        if (discount != null) {
+            return Response.ok(gson.toJson(discount)).build();
+        }
+        return Response.status(Response.Status.NOT_FOUND)
+                .entity("{\"message\": \"Discount not found\"}")
+                .build();
+    }
+
     // 🔹 Update an Existing Discount
     @PUT
     @Path("/{id}")

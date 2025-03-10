@@ -55,7 +55,7 @@
                             <div class="mb-3">
                                 <label>Extra Km Charge:</label>
                                 <input type="text" id="extraKmCharge" class="form-control" disabled>
-                                <small class="text-danger">* Additional kms will be charged at Rs <span id="extraKmRate"></span> per km</small>
+                                <small class="text-danger">* Additional Kms will be charged at Rs <span id="extraKmRate"></span> per km</small>
                             </div>
 
                             <div class="row">
@@ -101,7 +101,13 @@
                             </div>
 
                         </div>
-
+                        <!-- Discount Selection Section -->
+                        <div id="discountSection" class="mt-3">
+                            <h5 class="text-center"><i class="bi bi-gift"></i> Apply a Discount</h5>
+                            <div id="discountList" class="d-flex flex-wrap justify-content-center">
+                                <!-- Discounts will be dynamically loaded -->
+                            </div>
+                        </div>
                         <!-- Final Booking Details -->
                         <div id="finalBookingDetails" class="mt-3">
                             <h5 class="text-center"><i class="bi bi-pencil-square"></i> Final Booking Details</h5>
@@ -116,13 +122,14 @@
                                     <input type="time" class="form-control" id="bookingTime">
                                 </div>
                             </div>
-                        </div>
-
-
-                        <div class="mb-3">
+                            <div class="mb-3">
                             <label>Pickup Address:</label>
                             <input type="text" class="form-control" id="pickupAddress" placeholder="Enter pickup location">
                         </div>
+                        </div>
+
+
+                        
                         <!-- Check Availability Button -->
                         <div class="text-center">
                             <button type="button" class="btn btn-gold" onclick="checkAvailability()">

@@ -10,19 +10,27 @@ import java.util.List;
 import DBConnection.ConnectionHelper;
 
 public class ReservationsCRUD {
+    
+    // ✅ Add New Reservation
     public static int addReservation(Reservations reservation) {
-        String query = "INSERT INTO reservations (userId, vehicleId, driverId, stDate, endDate, stTime, stLocation, stat, comments) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO reservations (userId, vehicleId, driverId, dissId, ratId, stDate, endDate, stTime, stLocation, stat, finalPrice, comments) " +
+                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectionHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+            
             stmt.setInt(1, reservation.getUserId());
             stmt.setInt(2, reservation.getVehicleId());
             stmt.setObject(3, reservation.getDriverId(), Types.INTEGER);
-            stmt.setDate(4, reservation.getStDate());
-            stmt.setDate(5, reservation.getEndDate());
-            stmt.setTime(6, reservation.getStTime());
-            stmt.setString(7, reservation.getStLocation());
-            stmt.setString(8, reservation.getStat());
-            stmt.setString(9, reservation.getComments());
+            stmt.setObject(4, reservation.getDissId(), Types.INTEGER);
+            stmt.setObject(5, reservation.getRatId(), Types.INTEGER);
+            stmt.setDate(6, reservation.getStDate());
+            stmt.setDate(7, reservation.getEndDate());
+            stmt.setTime(8, reservation.getStTime());
+            stmt.setString(9, reservation.getStLocation());
+            stmt.setString(10, reservation.getStat());
+            stmt.setBigDecimal(11, reservation.getFinalPrice());
+            stmt.setString(12, reservation.getComments());
+
             stmt.executeUpdate();
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
@@ -34,6 +42,7 @@ public class ReservationsCRUD {
         return -1;
     }
 
+    // ✅ Fetch All Reservations
     public static List<Reservations> getReservations() {
         List<Reservations> reservations = new ArrayList<>();
         String query = "SELECT * FROM reservations";
@@ -46,11 +55,14 @@ public class ReservationsCRUD {
                         rs.getInt("userId"),
                         rs.getInt("vehicleId"),
                         rs.getObject("driverId") != null ? rs.getInt("driverId") : null,
+                        rs.getObject("dissId") != null ? rs.getInt("dissId") : null,
+                        rs.getObject("ratId") != null ? rs.getInt("ratId") : null,
                         rs.getDate("stDate"),
                         rs.getDate("endDate"),
                         rs.getTime("stTime"),
                         rs.getString("stLocation"),
                         rs.getString("stat"),
+                        rs.getBigDecimal("finalPrice"),
                         rs.getString("comments")
                 ));
             }
@@ -60,13 +72,13 @@ public class ReservationsCRUD {
         return reservations;
     }
     
-    // ✅ Fetch All Reservations for a User
-public List<Reservations> getReservationsByUserId(int userId) {
+    // ✅ Fetch All Reservations for a Specific User
+    public List<Reservations> getReservationsByUserId(int userId) {
         List<Reservations> reservations = new ArrayList<>();
         String sql = "SELECT * FROM reservations WHERE userId = ?";
         
         try (Connection conn = ConnectionHelper.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, userId);
             ResultSet rs = pstmt.executeQuery();
 
@@ -75,12 +87,15 @@ public List<Reservations> getReservationsByUserId(int userId) {
                 reservation.setId(rs.getInt("id"));
                 reservation.setUserId(rs.getInt("userId"));
                 reservation.setVehicleId(rs.getInt("vehicleId"));
-                reservation.setDriverId(rs.getInt("driverId"));
+                reservation.setDriverId(rs.getObject("driverId") != null ? rs.getInt("driverId") : null);
+                reservation.setDissId(rs.getObject("dissId") != null ? rs.getInt("dissId") : null);
+                reservation.setRatId(rs.getObject("ratId") != null ? rs.getInt("ratId") : null);
                 reservation.setStDate(rs.getDate("stDate"));
                 reservation.setEndDate(rs.getDate("endDate"));
                 reservation.setStTime(rs.getTime("stTime"));
                 reservation.setStLocation(rs.getString("stLocation"));
                 reservation.setStat(rs.getString("stat"));
+                reservation.setFinalPrice(rs.getBigDecimal("finalPrice"));
                 reservation.setComments(rs.getString("comments"));
 
                 reservations.add(reservation);
@@ -90,21 +105,58 @@ public List<Reservations> getReservationsByUserId(int userId) {
         }
         return reservations;
     }
+// ✅ Fetch a Reservation by ID
+public static Reservations getReservationById(int id) {
+    String query = "SELECT * FROM reservations WHERE id = ?";
+    try (Connection conn = ConnectionHelper.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(query)) {
 
+        stmt.setInt(1, id);
+        ResultSet rs = stmt.executeQuery();
+
+        if (rs.next()) {
+            return new Reservations(
+                rs.getInt("id"),
+                rs.getInt("userId"),
+                rs.getInt("vehicleId"),
+                rs.getObject("driverId") != null ? rs.getInt("driverId") : null,
+                rs.getObject("dissId") != null ? rs.getInt("dissId") : null,
+                rs.getObject("ratId") != null ? rs.getInt("ratId") : null,
+                rs.getDate("stDate"),
+                rs.getDate("endDate"),
+                rs.getTime("stTime"),
+                rs.getString("stLocation"),
+                rs.getString("stat"),
+                rs.getBigDecimal("finalPrice"),
+                rs.getString("comments")
+            );
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return null; // ❌ Return null if not found
+}
+
+    // ✅ Update an Existing Reservation
     public static int updateReservation(Reservations reservation) {
-        String query = "UPDATE reservations SET userId=?, vehicleId=?, driverId=?, stDate=?, endDate=?, stTime=?, stLocation=?, stat=?, comments=? WHERE id=?";
+        String query = "UPDATE reservations SET userId=?, vehicleId=?, driverId=?, dissId=?, ratId=?, stDate=?, endDate=?, stTime=?, stLocation=?, stat=?, finalPrice=?, comments=? WHERE id=?";
         try (Connection conn = ConnectionHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
+            
             stmt.setInt(1, reservation.getUserId());
             stmt.setInt(2, reservation.getVehicleId());
             stmt.setObject(3, reservation.getDriverId(), Types.INTEGER);
-            stmt.setDate(4, reservation.getStDate());
-            stmt.setDate(5, reservation.getEndDate());
-            stmt.setTime(6, reservation.getStTime());
-            stmt.setString(7, reservation.getStLocation());
-            stmt.setString(8, reservation.getStat());
-            stmt.setString(9, reservation.getComments());
-            stmt.setInt(10, reservation.getId());
+            stmt.setObject(4, reservation.getDissId(), Types.INTEGER);
+            stmt.setObject(5, reservation.getRatId(), Types.INTEGER);
+            stmt.setDate(6, reservation.getStDate());
+            stmt.setDate(7, reservation.getEndDate());
+            stmt.setTime(8, reservation.getStTime());
+            stmt.setString(9, reservation.getStLocation());
+            stmt.setString(10, reservation.getStat());
+            stmt.setBigDecimal(11, reservation.getFinalPrice());
+            stmt.setString(12, reservation.getComments());
+            stmt.setInt(13, reservation.getId());
+
             return stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -112,6 +164,7 @@ public List<Reservations> getReservationsByUserId(int userId) {
         return -1;
     }
 
+    // ✅ Delete a Reservation
     public static int deleteReservation(int id) {
         String query = "DELETE FROM reservations WHERE id=?";
         try (Connection conn = ConnectionHelper.getConnection();
@@ -123,5 +176,18 @@ public List<Reservations> getReservationsByUserId(int userId) {
         }
         return -1;
     }
-}
 
+    // ✅ Update Reservation Status Only
+    public static int updateReservationStatus(int id, String newStatus) {
+        String query = "UPDATE reservations SET stat=? WHERE id=?";
+        try (Connection conn = ConnectionHelper.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, newStatus);
+            stmt.setInt(2, id);
+            return stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+}

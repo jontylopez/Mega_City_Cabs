@@ -10,7 +10,7 @@ public class VehicleAvailability {
     private int vehicleId;
 
     @JsonAdapter(SqlDateAdapter.class)
-    private Date startDate;
+    private Date stDate;
 
     @JsonAdapter(SqlDateAdapter.class)
     private Date endDate;
@@ -18,10 +18,10 @@ public class VehicleAvailability {
     public VehicleAvailability() {
     }
 
-    public VehicleAvailability(int id, int vehicleId, Date startDate, Date endDate) {
+    public VehicleAvailability(int id, int vehicleId, Date stDate, Date endDate) {
         this.id = id;
         this.vehicleId = vehicleId;
-        this.startDate = startDate;
+        this.stDate = stDate;
         this.endDate = endDate;
     }
 
@@ -43,11 +43,11 @@ public class VehicleAvailability {
     }
 
     public Date getStartDate() {
-        return startDate;
+        return stDate;
     }
 
     public void setStartDate(Date startDate) {
-        this.startDate = startDate;
+        this.stDate = startDate;
     }
 
     public Date getEndDate() {

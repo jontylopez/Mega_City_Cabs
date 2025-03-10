@@ -7,6 +7,7 @@ package com.mycompany.restapimccabs.resources;
 import com.google.gson.Gson;
 import DiscountAvailability.DiscountAvailability;
 import DiscountAvailability.DiscountAvailabilityCRUD;
+import com.google.gson.JsonObject;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -43,4 +44,20 @@ public class DiscountAvailabilityService {
         List<DiscountAvailability> discountUsages = DiscountAvailabilityCRUD.getDiscountUsages();
         return Response.ok(gson.toJson(discountUsages)).build();
     }
+    
+   // ✅ Delete Discount Availability by userId and dissId
+@DELETE
+@Path("/delete/{userId}/{dissId}")
+public Response deleteDiscountAvailability(@PathParam("userId") int userId, @PathParam("dissId") int dissId) {
+    int rowsDeleted = DiscountAvailabilityCRUD.deleteDiscountAvailability(userId, dissId);
+
+    JsonObject responseJson = new JsonObject();
+    if (rowsDeleted > 0) {
+        responseJson.addProperty("message", "Discount availability deleted successfully");
+        return Response.ok(responseJson.toString()).build();
+    }
+    responseJson.addProperty("message", "Failed to delete discount availability");
+    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(responseJson.toString()).build();
+}
+
 }

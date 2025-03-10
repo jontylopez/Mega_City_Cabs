@@ -105,7 +105,31 @@ public class DiscountsCRUD {
         }
         return 0;
     }
+public static Discounts getDiscountById(int id) {
+        String query = "SELECT * FROM discounts WHERE id = ?";
+        
+        try (Connection conn = ConnectionHelper.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
 
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return new Discounts(
+                    rs.getInt("id"),
+                    rs.getString("diskId"),
+                    rs.getBigDecimal("percentage"),
+                    rs.getDate("startDate"),
+                    rs.getDate("endDate"),
+                    rs.getString("dStatus")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null; // ❌ No discount found
+    }
     // 🔹 Delete a Discount
     public static int deleteDiscount(int id) {
         String query = "DELETE FROM discounts WHERE id=?";

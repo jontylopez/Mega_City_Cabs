@@ -13,7 +13,7 @@ public class DiscountAvailabilityCRUD {
 
     // 🔹 Add Discount Usage Record
     public static int addDiscountUsage(DiscountAvailability discountUsage) {
-        String query = "INSERT INTO discount_availability (userId, discountId, usedAt) VALUES (?, ?, NOW())";
+        String query = "INSERT INTO discount_availability (userId, dissId, usedAt) VALUES (?, ?, NOW())";
         try (Connection conn = ConnectionHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -44,7 +44,7 @@ public class DiscountAvailabilityCRUD {
                 discountList.add(new DiscountAvailability(
                         rs.getInt("id"),
                         rs.getInt("userId"),
-                        rs.getInt("discountId"),
+                        rs.getInt("dissId"),
                         rs.getTimestamp("usedAt")
                 ));
             }
@@ -53,4 +53,22 @@ public class DiscountAvailabilityCRUD {
         }
         return discountList;
     }
+// 🔹 Delete Discount Availability using userId and discountId
+public static int deleteDiscountAvailability(int userId, int discountId) {
+    String query = "DELETE FROM discount_availability WHERE userId = ? AND dissId = ?";
+
+    try (Connection conn = ConnectionHelper.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+
+        stmt.setInt(1, userId);
+        stmt.setInt(2, discountId);
+
+        return stmt.executeUpdate(); // ✅ Returns the number of rows deleted
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return -1; // ❌ Failure
+}
+
 }

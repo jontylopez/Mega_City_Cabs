@@ -4,6 +4,7 @@
  */
 package Reservation;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 
@@ -13,26 +14,32 @@ public class Reservations {
     private int userId;
     private int vehicleId;
     private Integer driverId;
+    private Integer dissId; // Discount ID (Nullable)
+    private Integer ratId; // Rating ID (Nullable)
     private Date stDate;
     private Date endDate;
     private Time stTime;
     private String stLocation;
     private String stat;
+    private BigDecimal finalPrice; // Final price for the ride
     private String comments;
 
     public Reservations() {
     }
 
-    public Reservations(int id, int userId, int vehicleId, Integer driverId, Date stDate, Date endDate, Time stTime, String stLocation, String stat, String comments) {
+    public Reservations(int id, int userId, int vehicleId, Integer driverId, Integer dissId, Integer ratId, Date stDate, Date endDate, Time stTime, String stLocation, String stat, BigDecimal finalPrice, String comments) {
         this.id = id;
         this.userId = userId;
         this.vehicleId = vehicleId;
         this.driverId = driverId;
+        this.dissId = dissId;
+        this.ratId = ratId;
         this.stDate = stDate;
         this.endDate = endDate;
         this.stTime = stTime;
         this.stLocation = stLocation;
         this.stat = stat;
+        this.finalPrice = finalPrice;
         this.comments = comments;
     }
 
@@ -67,6 +74,22 @@ public class Reservations {
 
     public void setDriverId(Integer driverId) {
         this.driverId = driverId;
+    }
+
+    public Integer getDissId() {
+        return dissId;
+    }
+
+    public void setDissId(Integer dissId) {
+        this.dissId = dissId;
+    }
+
+    public Integer getRatId() {
+        return ratId;
+    }
+
+    public void setRatId(Integer ratId) {
+        this.ratId = ratId;
     }
 
     public Date getStDate() {
@@ -107,6 +130,14 @@ public class Reservations {
 
     public void setStat(String stat) {
         this.stat = stat;
+    }
+
+    public BigDecimal getFinalPrice() {
+        return finalPrice;
+    }
+
+    public void setFinalPrice(BigDecimal finalPrice) {
+        this.finalPrice = finalPrice;
     }
 
     public String getComments() {

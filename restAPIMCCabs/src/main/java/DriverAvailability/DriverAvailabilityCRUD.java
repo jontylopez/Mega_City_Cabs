@@ -7,7 +7,7 @@ import DBConnection.ConnectionHelper;
 
 public class DriverAvailabilityCRUD {
     public static int addDriverAvailability(DriverAvailability availability) {
-        String query = "INSERT INTO driver_availability (driverId, startDate, endDate) VALUES (?, ?, ?)";
+        String query = "INSERT INTO driver_availability (driverId, stDate, endDate) VALUES (?, ?, ?)";
         try (Connection conn = ConnectionHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setInt(1, availability.getDriverId());
@@ -43,4 +43,23 @@ public class DriverAvailabilityCRUD {
         }
         return availabilities;
     }
+    
+// 🔹 Delete Driver Availability using driverId and stDate
+public static int deleteDriverAvailability(int driverId, Date startDate) {
+    String query = "DELETE FROM driver_availability WHERE driverId = ? AND stDate = ?";
+
+    try (Connection conn = ConnectionHelper.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+
+        stmt.setInt(1, driverId);
+        stmt.setDate(2, new java.sql.Date(startDate.getTime()));
+
+        return stmt.executeUpdate(); // ✅ Returns the number of rows deleted
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return -1; // ❌ Failure
+}
+
 }
