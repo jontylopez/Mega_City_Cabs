@@ -11,6 +11,7 @@ import java.util.List;
 
 @Path("ratings")
 public class RatingsService {
+
     private final RatingsCRUD ratingsCRUD = new RatingsCRUD();
     private final Gson gson = new Gson();
 
@@ -42,6 +43,21 @@ public class RatingsService {
         });
 
         return Response.ok(gson.toJson(ratings)).build();
+    }
+
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRatingById(@PathParam("id") int id) {
+        Ratings rating = RatingsCRUD.getRatingById(id);
+
+        if (rating != null) {
+            // ✅ Compute Overall Rating and include in response
+            rating.setComment(rating.getComment() + " | Overall Rating: " + rating.getOverallRating());
+            return Response.ok(gson.toJson(rating)).build();
+        }
+
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     @PUT

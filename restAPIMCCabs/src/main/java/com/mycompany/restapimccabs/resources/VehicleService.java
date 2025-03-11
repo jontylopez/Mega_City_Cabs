@@ -15,36 +15,36 @@ import java.util.List;
 
 @Path("vehicles")
 public class VehicleService {
+
     private final VehiclesCRUD vehicleCRUD = new VehiclesCRUD();
     private final Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, new SqlDateAdapter()).create(); // ✅ Fix
 
-@POST
-@Path("/create")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON)
-public Response addVehicle(String json) {
-    System.out.println("🚀 Received JSON: " + json);
-    Vehicles vehicle = gson.fromJson(json, Vehicles.class);
+    @POST
+    @Path("/create")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response addVehicle(String json) {
+        System.out.println("🚀 Received JSON: " + json);
+        Vehicles vehicle = gson.fromJson(json, Vehicles.class);
 
-    System.out.println("✅ Parsed Vehicle: " + vehicle.getVehicleNo());
-    
-    int vehicleId = vehicleCRUD.addVehicle(vehicle);
+        System.out.println("✅ Parsed Vehicle: " + vehicle.getVehicleNo());
 
-    if (vehicleId > 0) {
-        return Response.status(Response.Status.CREATED)
-                .entity("{\"message\": \"Vehicle created successfully\", \"vehicleId\": " + vehicleId + "}")
-                .build();
-    } else if (vehicleId == -2) {
-        return Response.status(Response.Status.CONFLICT) // ✅ 409 Conflict for duplicate entry
-                .entity("{\"message\": \"Error: Vehicle number already exists!\"}")
+        int vehicleId = vehicleCRUD.addVehicle(vehicle);
+
+        if (vehicleId > 0) {
+            return Response.status(Response.Status.CREATED)
+                    .entity("{\"message\": \"Vehicle created successfully\", \"vehicleId\": " + vehicleId + "}")
+                    .build();
+        } else if (vehicleId == -2) {
+            return Response.status(Response.Status.CONFLICT) // ✅ 409 Conflict for duplicate entry
+                    .entity("{\"message\": \"Error: Vehicle number already exists!\"}")
+                    .build();
+        }
+
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("{\"message\": \"Failed to create vehicle\"}")
                 .build();
     }
-
-    return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-            .entity("{\"message\": \"Failed to create vehicle\"}")
-            .build();
-}
-
 
     // 🔹 FETCH VEHICLES
     @GET
@@ -52,6 +52,19 @@ public Response addVehicle(String json) {
     public Response getVehicles() {
         List<Vehicles> vehicles = vehicleCRUD.getVehicles();
         return Response.ok(gson.toJson(vehicles)).build();
+    }
+
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getVehicleById(@PathParam("id") int id) {
+        Vehicles vehicle = VehiclesCRUD.getVehicleById(id);
+
+        if (vehicle != null) {
+            return Response.ok(gson.toJson(vehicle)).build();
+        }
+
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     // 🔹 UPDATE VEHICLE

@@ -17,6 +17,7 @@ import java.util.List;
 
 @Path("users")
 public class UserService {
+
     private final UsersCRUD usersCRUD = new UsersCRUD();
     private final Gson gson = new Gson();
 
@@ -44,6 +45,19 @@ public class UserService {
         return Response.ok(gson.toJson(users)).build();
     }
 
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUserById(@PathParam("id") int id) {
+        Users user = UsersCRUD.getUserById(id);
+
+        if (user != null) {
+            return Response.ok(gson.toJson(user)).build();
+        }
+
+        return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
     @PUT
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -59,23 +73,23 @@ public class UserService {
                 .entity("{\"message\": \"Failed to update user\"}")
                 .build();
     }
+
     @PUT
-@Path("/{id}/role")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON)
-public Response updateUserRole(@PathParam("id") int id, String json) {
-    JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
-    String newRole = jsonObject.get("uRole").getAsString();
+    @Path("/{id}/role")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateUserRole(@PathParam("id") int id, String json) {
+        JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
+        String newRole = jsonObject.get("uRole").getAsString();
 
-    int rowsUpdated = UsersCRUD.updateUserRole(id, newRole);
-    if (rowsUpdated > 0) {
-        return Response.ok("{\"message\": \"User role updated successfully\"}").build();
+        int rowsUpdated = UsersCRUD.updateUserRole(id, newRole);
+        if (rowsUpdated > 0) {
+            return Response.ok("{\"message\": \"User role updated successfully\"}").build();
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("{\"message\": \"Failed to update user role\"}")
+                .build();
     }
-    return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-            .entity("{\"message\": \"Failed to update user role\"}")
-            .build();
-}
-
 
     @DELETE
     @Path("/{id}")

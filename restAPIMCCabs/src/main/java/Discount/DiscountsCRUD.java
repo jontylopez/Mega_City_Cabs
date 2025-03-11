@@ -39,7 +39,30 @@ public class DiscountsCRUD {
         }
         return -1; // ❌ Failure
     }
+public static List<Discounts> getAllDiscounts() {
+    List<Discounts> discounts = new ArrayList<>();
+    String query = "SELECT * FROM discounts";
+    
+    try (Connection conn = ConnectionHelper.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery(query)) {
+        while (rs.next()) {
+            discounts.add(new Discounts(
+                rs.getInt("id"),
+                rs.getString("diskId"),
+                rs.getBigDecimal("percentage"),
+                rs.getDate("startDate"),
+                rs.getDate("endDate"),
+                rs.getString("dStatus")
+            ));
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return discounts;
+}
 
+    
     // 🔹 Get Active Discounts
     public static List<Discounts> getActiveDiscounts() {
         List<Discounts> discounts = new ArrayList<>();

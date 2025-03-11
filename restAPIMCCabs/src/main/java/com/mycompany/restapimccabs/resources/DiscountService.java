@@ -41,6 +41,13 @@ public class DiscountService {
                 .build();
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllDiscounts() {
+        List<Discounts> discounts = discountCRUD.getAllDiscounts();  // Fetch all discounts
+        return Response.ok(gson.toJson(discounts)).build();
+    }
+
     // 🔹 Retrieve All Active Discounts
     @GET
     @Path("/active")

@@ -134,7 +134,7 @@
                                     <button class="btn btn-outline-secondary" onclick="loadPage('bookingHistory.jsp')">
                                         <i class="fas fa-history"></i> View Booking History
                                     </button>
-                                    <button class="btn btn-outline-info" onclick="refreshDashboard()">
+                                    <button class="btn btn-outline-info" onclick="loadPage('customerDash.jsp')">
                                         <i class="fas fa-sync-alt"></i> Refresh Dashboard
                                     </button>
                                 </div>

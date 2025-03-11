@@ -74,11 +74,19 @@ function setupLinks() {
     });
 }
 
-
+const reservationApiUrl = "http://localhost:8080/restAPIMCCabs/api/reservations/";
+const userApiUrl = "http://localhost:8080/restAPIMCCabs/api/users";
+const vehicleApiUrl = "http://localhost:8080/restAPIMCCabs/api/vehicles";
+const driverApiUrl = "http://localhost:8080/restAPIMCCabs/api/drivers/";
+const discountApiUrl = "http://localhost:8080/restAPIMCCabs/api/discounts/";
+const categoryApiUrl = "http://localhost:8080/restAPIMCCabs/api/categories";
+const jointApiUrl = "http://localhost:8080/restAPIMCCabs/api/joint";
+const vehicleAvailabilityApiUrl = "http://localhost:8080/restAPIMCCabs/api/vehicle_availability/";
+const driverAvailabilityApiUrl = "http://localhost:8080/restAPIMCCabs/api/driver_availability/";
+const discountAvailabilityApiUrl = "http://localhost:8080/restAPIMCCabs/api/discount_availability/";
 // ==========================================
 // 🔹 CATEGORY MANAGEMENT FOR BOOKING PAGE
 // ==========================================
-const categoryApiUrl = "http://localhost:8080/restAPIMCCabs/api/categories";
 
 // 🔹 Fetch Categories Data
 async function getCategories() {
@@ -283,7 +291,6 @@ function updateBookingDate() {
     document.getElementById("endDate").setAttribute("min", startDate); // Prevent selecting a past end date
 }
 
-const jointApiUrl = "http://localhost:8080/restAPIMCCabs/api/joint";
 
 /**
  * ✅ Check Vehicle & Driver Availability using API
@@ -523,12 +530,7 @@ function getSessionUserId() {
 // ==========================================
 // 🔹 FETCH NEXT TRIP FOR CUSTOMER DASHBOARD
 // ==========================================
-const reservationApiUrl = "http://localhost:8080/restAPIMCCabs/api/reservations/";
-const driverApiUrl = "http://localhost:8080/restAPIMCCabs/api/drivers/";
-const discountApiUrl = "http://localhost:8080/restAPIMCCabs/api/discounts/";
-const vehicleAvailabilityApiUrl = "http://localhost:8080/restAPIMCCabs/api/vehicle_availability/";
-const driverAvailabilityApiUrl = "http://localhost:8080/restAPIMCCabs/api/driver_availability/";
-const discountAvailabilityApiUrl = "http://localhost:8080/restAPIMCCabs/api/discount_availability/";
+
 /**
  * ✅ Fetch & Display Next Trip for the Customer
  */
@@ -569,7 +571,7 @@ async function loadTripDetails(userId = null) {
                 .sort((a, b) => new Date(a.stDate) - new Date(b.stDate));
 
         if (upcomingTrips.length === 0) {
-            console.warn("⚠️ No upcoming trips available.");
+            console.log("❌️ No upcoming trips available.");
             showNoUpcomingTrips();
             return;
         }
@@ -726,78 +728,107 @@ async function cancelTrip(tripId) {
 }
 
 /**
- * ✅ Load Booking History
+ * ✅ Load Booking History and Populate Table
  */
 async function loadBookingHistory() {
     console.log("📌 Fetching Booking History...");
-
     const userId = getSessionUserId();
-    if (!userId)
-        return;
+    if (!userId) return;
+
+    const bookingHistoryTable = document.getElementById("bookingHistoryTable");
+    bookingHistoryTable.innerHTML = `
+        <tr><td colspan="10" class="no-data-message">Loading booking history...</td></tr>
+    `;
 
     try {
-        const response = await fetch(`${reservationApiUrl}${userId}`);
-        if (!response.ok)
-            throw new Error(`❌ Server Error: ${response.status}`);
-
-        let reservations = await response.json();
-        console.log("✅ Fetched Booking History:", reservations);
-
-        // ✅ Update UI with booking history
-        const bookingHistoryTable = document.getElementById("bookingHistoryTable");
-        if (!bookingHistoryTable) {
-            console.error("❌ Booking history table not found!");
-            return;
-        }
-
-        // Clear previous content
-        bookingHistoryTable.innerHTML = "";
-
-        // Check if we have reservations
+        // ✅ Fetch reservations
+        const reservationsResponse = await fetch(`${reservationApiUrl}${userId}`);
+        if (!reservationsResponse.ok) throw new Error("🚨 Failed to fetch reservations");
+        const reservations = await reservationsResponse.json();
         if (reservations.length === 0) {
             bookingHistoryTable.innerHTML = `
-                <tr>
-                    <td colspan="8" class="text-center">No booking history found.</td>
-                </tr>`;
+                <tr><td colspan="10" class="no-data-message">No booking history found.</td></tr>
+            `;
             return;
         }
 
-        // Sort by start date, newest first
-        reservations.sort((a, b) => new Date(b.stDate) - new Date(a.stDate));
+        // ✅ Fetch Vehicles, Drivers, Discounts, and Categories for Details
+        const [vehiclesData, driversData, discountsData, categoriesData] = await Promise.all([
+            fetchData(vehicleApiUrl), // Vehicles (Contains catId)
+            fetchData(driverApiUrl),  // Drivers
+            fetchData(discountApiUrl), // Discounts
+            fetchData(categoryApiUrl) // Categories (Contains catName)
+        ]);
 
-        // Create rows for each reservation
+        bookingHistoryTable.innerHTML = ""; // Clear previous content
+
         reservations.forEach(reservation => {
-            const row = document.createElement("tr");
+            // ✅ Get Vehicle Category Name
+            const vehicle = vehiclesData.find(v => v.id === reservation.vehicleId);
+            const category = categoriesData.find(c => c.id === (vehicle ? vehicle.catId : null));
+            const categoryName = category ? category.catName : "Unknown";
 
-            // Format date
-            const formattedStartDate = new Date(reservation.stDate).toLocaleDateString();
+            // ✅ Get Driver Name
+            const driver = driversData.find(d => d.id === reservation.driverId);
+            const driverName = driver ? driver.dName : "Not Assigned";
 
-            row.innerHTML = `
-                <td>${reservation.id}</td>
-                <td>${formattedStartDate}</td>
-                <td>${reservation.stTime || "N/A"}</td>
-                <td>${reservation.stLocation || "N/A"}</td>
-                <td>${reservation.vehicleId || "Not Assigned"}</td>
-                <td>${reservation.driverId || "Not Assigned"}</td>
-                <td><span class="status-badge ${reservation.stat.toLowerCase()}">${reservation.stat}</span></td>
-                <td>
-                    ${reservation.stat !== "Cancelled" && reservation.stat !== "Completed" ?
-                    `<button class="btn btn-sm btn-danger" onclick="cancelTrip(${reservation.id})">Cancel</button>` :
-                    ""}
-                </td>
+            // ✅ Get Discount Percentage
+            const discount = discountsData.find(d => d.id === reservation.dissId);
+            const discountPercentage = discount ? `${discount.percentage}%` : "No Discount";
+
+            // ✅ Show Cancel button only if status = "Approved"
+            const actionButton = reservation.stat === "Approved"
+                ? `<button class="btn btn-danger btn-sm" onclick="cancelTrip(${reservation.id})">
+                    Cancel
+                   </button>`
+                : `<span class="text-muted">N/A</span>`;
+
+            // ✅ Create Row with Status Column
+            const row = `
+                <tr>
+                    <td>${reservation.id}</td>
+                    <td>${categoryName}</td>
+                    <td>${driverName}</td>
+                    <td>${reservation.stDate}</td>
+                    <td>${formatTime(reservation.stTime)}</td>
+                    <td>${reservation.stLocation}</td>
+                    <td>${reservation.endDate || "N/A"}</td>
+                    <td>${discountPercentage}</td>
+                    <td><span class="status-badge ${reservation.stat.toLowerCase()}">${reservation.stat}</span></td>
+                    <td>${actionButton}</td>
+                </tr>
             `;
-
-            bookingHistoryTable.appendChild(row);
+            bookingHistoryTable.innerHTML += row;
         });
 
     } catch (error) {
         console.error("🚨 Error Fetching Booking History:", error);
-        const bookingHistoryTable = document.getElementById("bookingHistoryTable");
-        if (bookingHistoryTable) {
-            bookingHistoryTable.innerHTML = `
-                <tr>
-                    <td colspan="8" class="text-center">Error loading booking history. Please try again later.</td>
-                </tr>`;
-        }
+        bookingHistoryTable.innerHTML = `
+            <tr><td colspan="10" class="no-data-message">Error loading data. Try again.</td></tr>
+        `;
     }
+}
+
+/**
+ * ✅ Utility Function: Fetch API Data
+ */
+async function fetchData(apiUrl) {
+    try {
+        const response = await fetch(apiUrl);
+        return response.ok ? await response.json() : [];
+    } catch (error) {
+        console.error(`🚨 Error fetching data from ${apiUrl}:`, error);
+        return [];
+    }
+}
+
+/**
+ * ✅ Format Time (24h to 12h)
+ */
+function formatTime(timeString) {
+    if (!timeString) return "N/A";
+    const [hours, minutes] = timeString.split(":");
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    return `${hour % 12 || 12}:${minutes} ${ampm}`;
 }
