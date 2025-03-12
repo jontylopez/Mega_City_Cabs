@@ -14,6 +14,7 @@ import java.util.List;
 
 @Path("joint")
 public class JointService {
+
     private final JointOperations jointOperations = new JointOperations();
     private final Gson gson = new Gson();
 
@@ -36,7 +37,7 @@ public class JointService {
             responseJson.addProperty("message", "No available vehicles found.");
             return Response.status(Response.Status.NOT_FOUND).entity(gson.toJson(responseJson)).build();
         }
-        
+
         return Response.ok(gson.toJson(availableVehicles)).build();
     }
 
@@ -58,7 +59,7 @@ public class JointService {
             responseJson.addProperty("message", "No available drivers found.");
             return Response.status(Response.Status.NOT_FOUND).entity(gson.toJson(responseJson)).build();
         }
-        
+
         return Response.ok(gson.toJson(availableDrivers)).build();
     }
 
@@ -71,10 +72,9 @@ public class JointService {
     public Response getAvailableDiscounts(@PathParam("userId") int userId) {
         List<Discounts> availableDiscounts = jointOperations.getAvailableDiscounts(userId);
 
-        JsonObject responseJson = new JsonObject();
         if (availableDiscounts.isEmpty()) {
-            responseJson.addProperty("message", "No active discounts available.");
-            return Response.status(Response.Status.NOT_FOUND).entity(gson.toJson(responseJson)).build();
+            // ✅ Return 200 OK with an empty array instead of 404
+            return Response.ok(gson.toJson(availableDiscounts)).build();
         }
 
         return Response.ok(gson.toJson(availableDiscounts)).build();
@@ -131,6 +131,7 @@ public class JointService {
      * ✅ Reservation Request Model (For Parsing JSON Input)
      */
     private static class ReservationRequest {
+
         int userId;
         int categoryId;
         String startDate;

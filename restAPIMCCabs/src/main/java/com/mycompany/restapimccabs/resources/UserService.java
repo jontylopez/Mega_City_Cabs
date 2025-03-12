@@ -14,6 +14,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Map;
 
 @Path("users")
 public class UserService {
@@ -117,5 +118,51 @@ public class UserService {
         return Response.status(Response.Status.UNAUTHORIZED)
                 .entity("{\"message\": \"Invalid email or password!\"}")
                 .build();
+    }
+    
+     /**
+     * ✅ Update User Contact Info (Email, Phone, Address)
+     */
+    @PUT
+    @Path("/{id}/updateContact")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateUserContact(@PathParam("id") int id, Map<String, String> contactDetails) {
+        String email = contactDetails.get("email");
+        String phone = contactDetails.get("phone");
+        String address = contactDetails.get("address");
+
+        int result = UsersCRUD.updateUserContactInfo(id, email, phone, address);
+        
+        if (result > 0) {
+            return Response.ok("{\"message\": \"Contact information updated successfully.\"}").build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"Failed to update contact information.\"}").build();
+        }
+    }
+
+    /**
+     * ✅ Change User Password
+     */
+    @POST
+    @Path("/{id}/changePassword")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response changeUserPassword(@PathParam("id") int id, Map<String, String> passwordData) {
+        String oldPassword = passwordData.get("currentPassword");
+        String newPassword = passwordData.get("newPassword");
+
+        int result = UsersCRUD.updateUserPassword(id, oldPassword, newPassword);
+        
+        if (result == 1) {
+            return Response.ok("{\"message\": \"Password updated successfully.\"}").build();
+        } else if (result == -2) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity("{\"error\": \"Incorrect old password.\"}").build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"Failed to update password.\"}").build();
+        }
     }
 }

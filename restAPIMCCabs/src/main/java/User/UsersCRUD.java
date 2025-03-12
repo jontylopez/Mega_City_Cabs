@@ -140,5 +140,54 @@ public class UsersCRUD {
         }
         return null;
     }
+    public static int updateUserContactInfo(int id, String email, String phone, String address) {
+    String query = "UPDATE users SET email=?, phone=?, address=? WHERE id=?";
+    try (Connection conn = ConnectionHelper.getConnection(); 
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+        
+        stmt.setString(1, email);
+        stmt.setString(2, phone);
+        stmt.setString(3, address);
+        stmt.setInt(4, id);
+
+        return stmt.executeUpdate();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return -1;
+}
+
+public static int updateUserPassword(int id, String oldPassword, String newPassword) {
+    String queryCheck = "SELECT pWord FROM users WHERE id=?";
+    String queryUpdate = "UPDATE users SET pWord=? WHERE id=?";
+    
+    try (Connection conn = ConnectionHelper.getConnection();
+         PreparedStatement stmtCheck = conn.prepareStatement(queryCheck);
+         PreparedStatement stmtUpdate = conn.prepareStatement(queryUpdate)) {
+        
+        // Step 1: Verify the old password
+        stmtCheck.setInt(1, id);
+        ResultSet rs = stmtCheck.executeQuery();
+
+        if (rs.next()) {
+            String storedPassword = rs.getString("pWord");
+            if (!encoder.matches(oldPassword, storedPassword)) {
+                return -2; // Incorrect old password
+            }
+        } else {
+            return -1; // User not found
+        }
+
+        // Step 2: Update to new password
+        stmtUpdate.setString(1, encoder.encode(newPassword));
+        stmtUpdate.setInt(2, id);
+        return stmtUpdate.executeUpdate();
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return -1;
+}
+
 
 }

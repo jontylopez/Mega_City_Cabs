@@ -43,6 +43,7 @@ function loadPage(url) {
                 if (url.includes("customerDash.jsp")) {
                     console.log("📌 Customer Dashboard Loaded! Fetching Next Trip...");
                     setTimeout(() => loadTripDetails(), 300); // Short delay to ensure elements exist
+                    setTimeout(() => loadPendingPayments(), 300);
                 }
 
                 // ✅ Load Booking Page & Categories
@@ -56,6 +57,10 @@ function loadPage(url) {
                 if (url.includes("bookingHistory.jsp")) {
                     console.log("📌 Booking History Page Loaded! Fetching Trips...");
                     loadBookingHistory();
+                }
+                if (url.includes("customerProfile.jsp")) {
+                    console.log("📌 Profile Page Loaded! Fetching user details...");
+                    setTimeout(loadUserProfile, 500);  // Ensure it runs after content is loaded
                 }
             })
             .catch(error => console.error("❌ Error loading page:", error));
@@ -84,6 +89,7 @@ const jointApiUrl = "http://localhost:8080/restAPIMCCabs/api/joint";
 const vehicleAvailabilityApiUrl = "http://localhost:8080/restAPIMCCabs/api/vehicle_availability/";
 const driverAvailabilityApiUrl = "http://localhost:8080/restAPIMCCabs/api/driver_availability/";
 const discountAvailabilityApiUrl = "http://localhost:8080/restAPIMCCabs/api/discount_availability/";
+const reservationFinalizeApiUrl = "http://localhost:8080/restAPIMCCabs/api/reservation_finalize";
 // ==========================================
 // 🔹 CATEGORY MANAGEMENT FOR BOOKING PAGE
 // ==========================================
@@ -733,7 +739,8 @@ async function cancelTrip(tripId) {
 async function loadBookingHistory() {
     console.log("📌 Fetching Booking History...");
     const userId = getSessionUserId();
-    if (!userId) return;
+    if (!userId)
+        return;
 
     const bookingHistoryTable = document.getElementById("bookingHistoryTable");
     bookingHistoryTable.innerHTML = `
@@ -743,7 +750,8 @@ async function loadBookingHistory() {
     try {
         // ✅ Fetch reservations
         const reservationsResponse = await fetch(`${reservationApiUrl}${userId}`);
-        if (!reservationsResponse.ok) throw new Error("🚨 Failed to fetch reservations");
+        if (!reservationsResponse.ok)
+            throw new Error("🚨 Failed to fetch reservations");
         const reservations = await reservationsResponse.json();
         if (reservations.length === 0) {
             bookingHistoryTable.innerHTML = `
@@ -755,7 +763,7 @@ async function loadBookingHistory() {
         // ✅ Fetch Vehicles, Drivers, Discounts, and Categories for Details
         const [vehiclesData, driversData, discountsData, categoriesData] = await Promise.all([
             fetchData(vehicleApiUrl), // Vehicles (Contains catId)
-            fetchData(driverApiUrl),  // Drivers
+            fetchData(driverApiUrl), // Drivers
             fetchData(discountApiUrl), // Discounts
             fetchData(categoryApiUrl) // Categories (Contains catName)
         ]);
@@ -778,10 +786,10 @@ async function loadBookingHistory() {
 
             // ✅ Show Cancel button only if status = "Approved"
             const actionButton = reservation.stat === "Approved"
-                ? `<button class="btn btn-danger btn-sm" onclick="cancelTrip(${reservation.id})">
+                    ? `<button class="btn btn-danger btn-sm" onclick="cancelTrip(${reservation.id})">
                     Cancel
                    </button>`
-                : `<span class="text-muted">N/A</span>`;
+                    : `<span class="text-muted">N/A</span>`;
 
             // ✅ Create Row with Status Column
             const row = `
@@ -826,9 +834,263 @@ async function fetchData(apiUrl) {
  * ✅ Format Time (24h to 12h)
  */
 function formatTime(timeString) {
-    if (!timeString) return "N/A";
+    if (!timeString)
+        return "N/A";
     const [hours, minutes] = timeString.split(":");
     const hour = parseInt(hours);
     const ampm = hour >= 12 ? "PM" : "AM";
     return `${hour % 12 || 12}:${minutes} ${ampm}`;
 }
+
+
+
+/**
+ * ✅ Load User Profile
+ */
+async function loadUserProfile() {
+    console.log("📌 Loading User Profile...");
+
+    const userId = getSessionUserId();
+    if (!userId) {
+        console.error("🚨 No user ID found in session!");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${userApiUrl}/${userId}`); // ✅ Fixed URL
+        if (!response.ok) throw new Error("🚨 Failed to fetch user data!");
+
+        const user = await response.json();
+        console.log("✅ User Data:", user);
+
+        // ✅ Check if elements exist before setting their values
+        const userIdField = document.getElementById("userId");
+        const emailField = document.getElementById("email");
+        const phoneField = document.getElementById("phone");
+        const addressField = document.getElementById("address");
+
+        if (!userIdField || !emailField || !phoneField || !addressField) {
+            console.error("🚨 One or more profile form elements are missing!");
+            return;
+        }
+
+        userIdField.value = user.id;
+        emailField.value = user.email;
+        phoneField.value = user.phone;
+        addressField.value = user.address;
+
+    } catch (error) {
+        console.error("🚨 Error loading user profile:", error);
+    }
+}
+
+/**
+ * ✅ Update Contact Information
+ */
+/**
+ * ✅ Update Contact Information (Email, Phone, Address)
+ */
+async function updateProfile(event) {
+    event.preventDefault();
+
+    const userId = document.getElementById("userId").value;
+    const updatedUser = {
+        email: document.getElementById("email").value,
+        phone: document.getElementById("phone").value,
+        address: document.getElementById("address").value
+    };
+
+    console.log("📌 Sending Profile Update:", updatedUser);
+
+    try {
+        const response = await fetch(`${userApiUrl}/${userId}/updateContact`, { // ✅ Corrected API Endpoint
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedUser)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "🚨 Failed to update profile!");
+        }
+
+        alert("✅ Profile updated successfully!");
+        loadUserProfile(); // Reload profile to show updated details
+
+    } catch (error) {
+        console.error("🚨 Error updating profile:", error);
+        alert(error.message);
+    }
+}
+
+/**
+ * ✅ Change Password
+ */
+async function changePassword(event) {
+    event.preventDefault();
+
+    const userId = document.getElementById("userId").value;
+    const currentPassword = document.getElementById("currentPassword").value;
+    const newPassword = document.getElementById("newPassword").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+
+    if (newPassword !== confirmPassword) {
+        alert("❌ Passwords do not match!");
+        return;
+    }
+
+    const passwordData = { currentPassword, newPassword };
+
+    console.log("📌 Sending Password Change Request:", passwordData);
+
+    try {
+        const response = await fetch(`${userApiUrl}/${userId}/changePassword`, { // ✅ Corrected API Endpoint
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(passwordData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "🚨 Failed to change password!");
+        }
+
+        alert("✅ Password changed successfully!");
+        document.getElementById("passwordForm").reset();
+
+    } catch (error) {
+        console.error("🚨 Error changing password:", error);
+        alert(error.message);
+    }
+}
+
+/**
+ * ✅ Load Pending Payments from reservation_finalize (Simplified)
+ */
+async function loadPendingPayments() {
+    console.log("📌 Fetching pending payments...");
+    const tableBody = document.getElementById("pendingPaymentsTable");
+
+    if (!tableBody) {
+        console.error("🚨 'pendingPaymentsTable' element not found!");
+        return;
+    }
+
+    tableBody.innerHTML = `<tr><td colspan="3" class="text-center">Loading...</td></tr>`;
+
+    try {
+        const response = await fetch(`${reservationFinalizeApiUrl}/all`);
+        if (!response.ok) throw new Error("Failed to fetch payments.");
+
+        let pendingPayments = await response.json();
+        pendingPayments = pendingPayments.filter(payment => payment.stat === "Pending");
+
+        if (pendingPayments.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="3" class="text-center">No pending payments.</td></tr>`;
+            return;
+        }
+
+        tableBody.innerHTML = "";
+
+        pendingPayments.forEach(payment => {
+            const row = `
+                <tr>
+                    <td>${payment.resId}</td>
+                    <td>Rs. ${payment.price.toFixed(2)}</td>
+                    <td>
+                        <button class="btn btn-info btn-sm" onclick="viewPendingPayment(${payment.id}, ${payment.resId})">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </td>
+                </tr>`;
+            tableBody.innerHTML += row;
+        });
+
+    } catch (error) {
+        console.error("🚨 Error fetching pending payments:", error);
+        tableBody.innerHTML = `<tr><td colspan="3" class="text-danger text-center">Failed to load payments.</td></tr>`;
+    }
+}
+
+/**
+ * ✅ View Pending Payment Details in Modal
+ */
+async function viewPendingPayment(finalizeId, resId) {
+    console.log(`📌 Viewing details for Finalization ID: ${finalizeId}`);
+
+    try {
+        // Fetch reservation finalization details
+        const finalizeResponse = await fetch(`${reservationFinalizeApiUrl}/${finalizeId}`);
+        if (!finalizeResponse.ok) throw new Error("Failed to fetch finalize details.");
+        const finalizeData = await finalizeResponse.json();
+
+        // Fetch reservation details
+        const reservationResponse = await fetch(`${reservationApiUrl}reservation/${resId}`);
+        if (!reservationResponse.ok) throw new Error("Failed to fetch reservation details.");
+        const reservationData = await reservationResponse.json();
+
+        // Fill modal data
+        document.getElementById("modalResId").innerText = finalizeData.resId;
+        document.getElementById("modalStartDate").innerText = reservationData.stDate;
+        document.getElementById("modalEndDate").innerText = reservationData.endDate;
+        document.getElementById("modalFinalPrice").innerText = reservationData.finalPrice.toFixed(2);
+        document.getElementById("modalExtraKm").innerText = finalizeData.extraKm;
+        document.getElementById("modalExtraHr").innerText = finalizeData.extraHr;
+        document.getElementById("modalPrice").innerText = finalizeData.price.toFixed(2);
+
+        // Attach payment function to "Pay Now" button
+        document.getElementById("payNowBtn").setAttribute("onclick", `payPendingPayment(${finalizeId}, ${resId})`);
+
+        // Show modal
+        new bootstrap.Modal(document.getElementById("paymentModal")).show();
+
+    } catch (error) {
+        console.error("🚨 Error fetching payment details:", error);
+        alert("🚨 Failed to load payment details.");
+    }
+}
+
+/**
+ * ✅ Mark Payment as Completed
+ */
+async function payPendingPayment(finalizeId, resId) {
+    if (!confirm("Are you sure you want to pay for this trip?")) return;
+
+    try {
+        // 🔹 Update reservation_finalize to Paid
+        const finalizeResponse = await fetch(`${reservationFinalizeApiUrl}/updateStatus/${finalizeId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ stat: "Paid" })
+        });
+
+        if (!finalizeResponse.ok) throw new Error("Failed to update finalize status!");
+
+        // 🔹 Update reservation status to Finalized
+        const reservationResponse = await fetch(`${reservationApiUrl}updateStatus/${resId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ stat: "Finalized" })
+        });
+
+        if (!reservationResponse.ok) throw new Error("Failed to update reservation status!");
+
+        alert("✅ Payment successful! Your trip has been finalized.");
+        loadPendingPayments(); // Refresh the table
+
+        // Close modal
+        bootstrap.Modal.getInstance(document.getElementById("paymentModal")).hide();
+
+    } catch (error) {
+        console.error("🚨 Error processing payment:", error);
+        alert("🚨 Payment failed! Try again.");
+    }
+}
+
+/**
+ * ✅ Initialize Pending Payments on Page Load
+ */
+document.addEventListener("DOMContentLoaded", () => {
+    loadPendingPayments();
+});
+

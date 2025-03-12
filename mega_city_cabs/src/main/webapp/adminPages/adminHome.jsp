@@ -60,7 +60,7 @@
                     <strong id="userText">User</strong>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-                    <li><a class="dropdown-item profile-link" href="../userPages/profile.jsp">Profile</a></li>
+                    <li><a class="dropdown-item profile-link" href="./adminProfile.jsp">Profile</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="#" onclick="logout()">Sign out</a></li>
                 </ul>
@@ -75,8 +75,6 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script src="../js/admin.js" defer></script>
-
-
 
     </body>
 </html>

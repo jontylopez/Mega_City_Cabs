@@ -26,6 +26,16 @@ function loadPage(url) {
                 setupLinks(); // Ensure links are clickable
 
                 console.log("✅ Page Loaded: ", url);
+                
+                if (url.includes("adminDash.jsp")) {
+                 console.log("📌 Admin Dashboard Loaded! Fetching pending reservations...");
+                setTimeout(loadPendingReservations, 500);
+            }
+            
+            if (url.includes("bookingManager.jsp")) {
+                 setTimeout(loadAllReservations, 500);
+                
+            }
 
                 // ✅ Handle Category Manager
                 if (url.includes("categoryManager.jsp")) {
@@ -66,10 +76,24 @@ function loadPage(url) {
                     loadUsers();
 
                 }
+                if (url.includes("adminProfile.jsp")) {
+                    console.log("📌 Profile Page Loaded! Fetching user details...");
+                    setTimeout(loadUserProfile, 500);  // Ensure it runs after content is loaded
+                }
             })
             .catch(error => console.error("❌ Error loading page:", error));
 }
-
+/**
+ * ✅ Get Logged-in User ID from SessionStorage
+ */
+function getSessionUserId() {
+    let userId = sessionStorage.getItem("userId"); // Retrieve user ID from session storage
+    if (!userId) {
+        console.warn("⚠️ User ID not found in sessionStorage! User may be logged out.");
+        return null;
+    }
+    return parseInt(userId, 10); // Convert to integer for safety
+}
 /**
  * ✅ Utility Function: Attach Event Listener to Forms
  * @param {string} formId - The ID of the form
@@ -102,10 +126,18 @@ function setupLinks() {
     });
 }
 
+const categoryApiUrl = "http://localhost:8080/restAPIMCCabs/api/categories/";
+const vehicleApiUrl = "http://localhost:8080/restAPIMCCabs/api/vehicles/";
+const driverApiUrl = "http://localhost:8080/restAPIMCCabs/api/drivers/";
+const discountApiUrl = "http://localhost:8080/restAPIMCCabs/api/discounts/";
+const userApiUrl = "http://localhost:8080/restAPIMCCabs/api/users/";
+const reservationApiUrl = "http://localhost:8080/restAPIMCCabs/api/reservations/";
+const reservationFinalizeApiUrl = "http://localhost:8080/restAPIMCCabs/api/reservation_finalize/";  
+
 // ==========================================
 // 🔹 CATEGORY MANAGEMENT FUNCTIONS
 // ==========================================
-const categoryApiUrl = "http://localhost:8080/restAPIMCCabs/api/categories";
+
 
 // 🔹 Fetch Categories Data
 async function getCategories() {
@@ -182,7 +214,7 @@ async function createCategory() {
     console.log("📌 Sending data:", category);
 
     try {
-        const response = await fetch(categoryApiUrl + "/create", {
+        const response = await fetch(categoryApiUrl + "create", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(category)
@@ -245,7 +277,7 @@ async function submitUpdate(event = null) {
     console.log("📌 Sending Update Request:", updatedCategory);
 
     try {
-        const response = await fetch(`${categoryApiUrl}/${id}`, {
+        const response = await fetch(`${categoryApiUrl}${id}`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(updatedCategory)
@@ -272,7 +304,7 @@ function cancelUpdate() {
 async function deleteCategory(id) {
     if (confirm("Are you sure you want to delete this category?")) {
         try {
-            const response = await fetch(`${categoryApiUrl}/${id}`, {method: "DELETE"});
+            const response = await fetch(`${categoryApiUrl}${id}`, {method: "DELETE"});
 
             if (response.ok) {
                 alert("✅ Category Deleted Successfully!");
@@ -289,7 +321,7 @@ async function deleteCategory(id) {
 // ==========================================
 // 🔹 VEHICLE MANAGEMENT FUNCTIONS
 // ==========================================
-const vehicleApiUrl = "http://localhost:8080/restAPIMCCabs/api/vehicles";
+
 
 /**
  * ✅ Utility Function: Format date to YYYY-MM-DD
@@ -398,7 +430,7 @@ async function createVehicle(event) {
     console.log("🚀 Sending Vehicle Data:", JSON.stringify(vehicle, null, 2));
 
     try {
-        const response = await fetch(vehicleApiUrl + "/create", {
+        const response = await fetch(vehicleApiUrl + "create", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(vehicle)
@@ -464,7 +496,7 @@ async function submitVehicleUpdate(event) {
     console.log("📌 Sending Update Request:", updatedVehicle);
 
     try {
-        const response = await fetch(`${vehicleApiUrl}/${id}`, {
+        const response = await fetch(`${vehicleApiUrl}${id}`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(updatedVehicle)
@@ -496,7 +528,7 @@ function cancelVehicleUpdate() {
 async function deleteVehicle(id) {
     if (confirm("Are you sure you want to delete this vehicle?")) {
         try {
-            const response = await fetch(`${vehicleApiUrl}/${id}`, {
+            const response = await fetch(`${vehicleApiUrl}${id}`, {
                 method: "DELETE"
             });
 
@@ -523,7 +555,7 @@ document.addEventListener("DOMContentLoaded", function () {
 // ==========================================
 // 🔹 DRIVER MANAGEMENT FUNCTIONS
 // ==========================================
-const driverApiUrl = "http://localhost:8080/restAPIMCCabs/api/drivers";
+
 
 /**
  * ✅ Fetch Drivers Data
@@ -597,7 +629,7 @@ async function createDriver() {
     console.log("📌 Sending Driver Data:", JSON.stringify(driver, null, 2));
 
     try {
-        const response = await fetch(driverApiUrl + "/create", {
+        const response = await fetch(driverApiUrl + "create", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(driver)
@@ -658,7 +690,7 @@ async function submitDriverUpdate() {
     console.log("📌 Sending Update Request:", updatedDriver);
 
     try {
-        const response = await fetch(`${driverApiUrl}/${id}`, {
+        const response = await fetch(`${driverApiUrl}${id}`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(updatedDriver)
@@ -690,7 +722,7 @@ function cancelDriverUpdate() {
 async function deleteDriver(id) {
     if (confirm("Are you sure you want to delete this driver?")) {
         try {
-            const response = await fetch(`${driverApiUrl}/${id}`, {
+            const response = await fetch(`${driverApiUrl}${id}`, {
                 method: "DELETE"
             });
 
@@ -1019,3 +1051,311 @@ async function deleteUser(id) {
 // ==========================================
 // 🔹 BOOKING MANAGEMENT FUNCTIONS
 // ==========================================
+
+/**
+ * ✅ Load All Reservations
+ */
+async function loadAllReservations() {
+    console.log("📌 Fetching all reservations...");
+    const tableBody = document.getElementById("reservationTable");
+
+    if (!tableBody) {
+        console.error("🚨 'reservationTable' element not found!");
+        return;
+    }
+
+    tableBody.innerHTML = `<tr><td colspan="8" class="text-center">Loading...</td></tr>`;
+
+    try {
+        const response = await fetch(reservationApiUrl + "all");
+        if (!response.ok) throw new Error("🚨 Failed to fetch reservations!");
+
+        let reservations = await response.json();
+        console.log("✅ All Reservations:", reservations);
+
+        if (reservations.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="8" class="text-center">No reservations found.</td></tr>`;
+            return;
+        }
+
+        tableBody.innerHTML = ""; // ✅ Clear previous data
+
+        for (const reservation of reservations) {
+            // ✅ Fetch User & Vehicle first
+            const userPromise = fetch(userApiUrl + reservation.userId).then(res => res.ok ? res.json() : { fullName: "Unknown User" });
+            const vehiclePromise = fetch(vehicleApiUrl + reservation.vehicleId).then(res => res.ok ? res.json() : { vehicleNo: "Unknown Vehicle", catId: null });
+
+            const [user, vehicle] = await Promise.all([userPromise, vehiclePromise]);
+
+            // ✅ Fetch Category & Driver only after vehicle is fetched
+            const categoryPromise = vehicle.catId ? fetch(categoryApiUrl + vehicle.catId).then(res => res.ok ? res.json() : { catName: "Unknown Category" }) : { catName: "Unknown Category" };
+            const driverPromise = reservation.driverId ? fetch(driverApiUrl + reservation.driverId).then(res => res.ok ? res.json() : { dName: "Not Assigned" }) : { dName: "Not Assigned" };
+
+            const [category, driver] = await Promise.all([categoryPromise, driverPromise]);
+
+            // ✅ Add row to table
+            const row = `
+                <tr>
+                    <td>${reservation.id}</td>
+                    <td>${user.fullName}</td>
+                    <td>${category.catName}</td>
+                    <td>${driver.dName}</td>
+                    <td>${reservation.stDate}</td>
+                    <td>${reservation.endDate}</td>
+                    <td>Rs. ${reservation.finalPrice ? reservation.finalPrice.toFixed(2) : "N/A"}</td>
+                    <td><span class="status-badge ${reservation.stat.toLowerCase()}">${reservation.stat}</span></td>
+                </tr>`;
+
+            tableBody.innerHTML += row;
+        }
+
+    } catch (error) {
+        console.error("🚨 Error fetching reservations:", error);
+        tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Failed to load reservations.</td></tr>`;
+    }
+}
+
+/**
+ * ✅ Filter Reservations
+ */
+function filterReservations() {
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const rows = document.querySelectorAll("#reservationTable tr");
+
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(input) ? "" : "none";
+    });
+}
+
+
+/**
+ * ✅ Load Pending Finalization Reservations
+ */
+async function loadPendingReservations() {
+    console.log("📌 Fetching all reservations...");
+    const tableBody = document.getElementById("reservationTable");
+
+    if (!tableBody) {
+        console.error("🚨 'reservationTable' element not found!");
+        return;
+    }
+
+    tableBody.innerHTML = `<tr><td colspan="5" class="text-center">Loading...</td></tr>`;
+
+    try {
+        const response = await fetch(reservationApiUrl + "all");
+        if (!response.ok) throw new Error("🚨 Failed to fetch reservations!");
+
+        let allReservations = await response.json();
+        console.log("✅ All Reservations:", allReservations);
+
+        let pendingReservations = allReservations.filter(reservation => {
+            let endDate = new Date(reservation.endDate);
+            return new Date() > endDate;
+        });
+
+        if (pendingReservations.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="5" class="text-center">No pending finalizations.</td></tr>`;
+            return;
+        }
+
+        tableBody.innerHTML = "";
+
+        for (const reservation of pendingReservations) {
+            const user = await fetch(userApiUrl + reservation.userId)
+                .then(res => res.ok ? res.json() : { fullName: "Unknown User" });
+
+            const row = `
+                <tr>
+                    <td>${reservation.id}</td>
+                    <td>${user.fullName}</td>
+                    <td>Rs. ${reservation.finalPrice ? reservation.finalPrice.toFixed(2) : "N/A"}</td>
+                    <td><span class="status-badge pending">${reservation.stat}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="openFinalizeModal(${reservation.id}, ${reservation.vehicleId}, '${reservation.stDate}', '${reservation.endDate}')">
+                            <i class="bi bi-clipboard-check"></i> Finalize
+                        </button>
+                    </td>
+                </tr>`;
+
+            tableBody.innerHTML += row;
+        }
+    } catch (error) {
+        console.error("🚨 Error fetching reservations:", error);
+        tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Failed to load reservations.</td></tr>`;
+    }
+}
+
+/**
+ * ✅ Open Finalize Modal & Prefill Data
+ */
+async function openFinalizeModal(id, vehicleId, stDate, endDate) {
+    document.getElementById("finalizeReservationId").value = id;
+    document.getElementById("modalStartDate").innerText = stDate;
+    document.getElementById("modalEndDate").innerText = endDate;
+    document.getElementById("extraKm").value = "";
+    document.getElementById("extraHrs").value = "";
+    document.getElementById("calculatedCharges").innerText = "Rs. 0.00";
+
+    document.getElementById("finalizeModal").style.display = "flex";
+
+    // ✅ Ensure category details are fetched before calculation
+    try {
+        const vehicleResponse = await fetch(`${vehicleApiUrl}${vehicleId}`);
+        if (!vehicleResponse.ok) throw new Error("Failed to fetch vehicle details");
+        const vehicle = await vehicleResponse.json();
+
+        const categoryResponse = await fetch(`${categoryApiUrl}${vehicle.catId}`);
+        if (!categoryResponse.ok) throw new Error("Failed to fetch category details");
+        const category = await categoryResponse.json();
+
+        console.log("🚗 Vehicle Details:", vehicle);
+        console.log("🏷️ Category Details:", category);
+
+        // Attach input events for calculation
+        document.getElementById("extraKm").addEventListener("input", () => calculateAdditionalCharges(category));
+        document.getElementById("extraHrs").addEventListener("input", () => calculateAdditionalCharges(category));
+    } catch (error) {
+        console.error("🚨 Error fetching vehicle or category details:", error);
+        document.getElementById("calculatedCharges").innerText = "Error fetching rates!";
+    }
+}
+
+/**
+ * ✅ Calculate Additional Charges Based on Category Pricing
+ */
+function calculateAdditionalCharges(category) {
+    const extraKm = parseFloat(document.getElementById("extraKm").value) || 0;
+    const extraHrs = parseFloat(document.getElementById("extraHrs").value) || 0;
+
+    if (!category) {
+        console.error("🚨 Category details are missing!");
+        document.getElementById("calculatedCharges").innerText = "Error in calculation!";
+        return;
+    }
+
+    const extraKmCharge = extraKm * category.extraKm;
+    const extraHrCharge = extraHrs * category.waitingPerHr;
+    const totalExtraCharge = extraKmCharge + extraHrCharge;
+
+    console.log(`📌 Calculated: Extra KM: ${extraKmCharge}, Extra Hrs: ${extraHrCharge}, Total: ${totalExtraCharge}`);
+
+    document.getElementById("calculatedCharges").innerText = `Rs. ${totalExtraCharge.toFixed(2)}`;
+}
+
+/**
+ * ✅ Finalize Reservation
+ */
+/**
+ * ✅ Finalize Reservation
+ */
+async function finalizeTrip() {
+    const reservationId = document.getElementById("finalizeReservationId").value;
+    const extraKm = parseFloat(document.getElementById("extraKm").value) || 0;
+    const extraHrs = parseFloat(document.getElementById("extraHrs").value) || 0;
+    const calculatedCharges = parseFloat(document.getElementById("calculatedCharges").innerText.replace("Rs. ", "")) || 0;
+
+    if (!reservationId) {
+        alert("🚨 Invalid reservation ID!");
+        return;
+    }
+
+    try {
+        if (extraKm === 0 && extraHrs === 0) {
+            // ✅ No extra charges → Update Reservation Status to "Finalized"
+            console.log(`✅ Finalizing reservation ${reservationId} without extra charges.`);
+            const statusResponse = await fetch(`${reservationApiUrl}updateStatus/${reservationId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ stat: "Finalized" })
+            });
+
+            if (statusResponse.ok) {
+                alert("🎉 Reservation finalized successfully!");
+            } else {
+                throw new Error("Failed to finalize reservation!");
+            }
+        } else {
+            // ✅ Extra charges exist → Insert into `reservation_finalize` and Update Reservation Status to "PendingPayment"
+            console.log(`📌 Adding reservation_finalize entry for reservation ${reservationId}.`);
+            const finalizeResponse = await fetch(`${reservationFinalizeApiUrl}create`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    resId: reservationId,
+                    extraKm: extraKm,
+                    extraHr: extraHrs,
+                    price: calculatedCharges,
+                    stat: "Pending"
+                })
+            });
+
+            if (!finalizeResponse.ok) throw new Error("Failed to add finalize record!");
+
+            console.log(`✅ Changing reservation ${reservationId} status to 'PendingPayment'.`);
+            const statusResponse = await fetch(`${reservationApiUrl}updateStatus/${reservationId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ stat: "PendingPayment" })
+            });
+
+            if (!statusResponse.ok) throw new Error("Failed to update reservation status!");
+
+            alert("🎉 Reservation finalized with additional charges!");
+        }
+    } catch (error) {
+        console.error("🚨 Error finalizing trip:", error);
+        alert("🚨 An error occurred while finalizing the reservation.");
+    }
+
+    closeFinalizeModal();
+}
+/**
+ * ✅ Close Modal
+ */
+function closeFinalizeModal() {
+    document.getElementById("finalizeModal").style.display = "none";
+}
+
+
+
+/**
+ * ✅ Load User Profile
+ */
+async function loadUserProfile() {
+    console.log("📌 Loading User Profile...");
+
+    const userId = getSessionUserId();
+    if (!userId) {
+        console.error("🚨 No user ID found in session!");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${userApiUrl}${userId}`); // ✅ Fixed URL
+        if (!response.ok) throw new Error("🚨 Failed to fetch user data!");
+
+        const user = await response.json();
+        console.log("✅ User Data:", user);
+
+        // ✅ Check if elements exist before setting their values
+        const userIdField = document.getElementById("userId");
+        const emailField = document.getElementById("email");
+        const phoneField = document.getElementById("phone");
+        const addressField = document.getElementById("address");
+
+        if (!userIdField || !emailField || !phoneField || !addressField) {
+            console.error("🚨 One or more profile form elements are missing!");
+            return;
+        }
+
+        userIdField.value = user.id;
+        emailField.value = user.email;
+        phoneField.value = user.phone;
+        addressField.value = user.address;
+
+    } catch (error) {
+        console.error("🚨 Error loading user profile:", error);
+    }
+}

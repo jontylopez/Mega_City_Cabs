@@ -35,6 +35,53 @@
                 <div class="dashboard-layout">
                     <!-- Trip Details Column -->
                     <div class="trip-details-column">
+                        
+                      <!-- 🚨 Pending Payments Section -->
+<div class="pending-payments-section">
+    <h3><i class="fas fa-money-bill-wave"></i> Pending Payments</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Trip ID</th>
+                <th>Amount Due</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="pendingPaymentsTable">
+            <tr>
+                <td colspan="3" class="text-center">Loading pending payments...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- 🚨 Payment Details Modal -->
+<div id="paymentModal" class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-file-invoice"></i> Payment Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Reservation ID:</strong> <span id="modalResId"></span></p>
+                <p><strong>Start Date:</strong> <span id="modalStartDate"></span></p>
+                <p><strong>End Date:</strong> <span id="modalEndDate"></span></p>
+                <p><strong>Final Price:</strong> Rs. <span id="modalFinalPrice"></span></p>
+                <p><strong>Extra KM:</strong> <span id="modalExtraKm"></span> km</p>
+                <p><strong>Extra Hours:</strong> <span id="modalExtraHr"></span> hrs</p>
+                <p><strong>Amount Due:</strong> Rs. <span id="modalPrice"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="payNowBtn">
+                    <i class="fas fa-credit-card"></i> Pay Now
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+                        
                         <div id="tripDetailsContainer" style="display: none;">
                             <!-- Your Next Trip Card -->
                             <div class="card next-trip-card">

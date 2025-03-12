@@ -1,0 +1,44 @@
+/* ✅ Profile Page Styling */
+body {
+    font-family: Arial, sans-serif;
+    background: #f8f9fa;
+}
+
+.container {
+    max-width: 600px;
+}
+
+.card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+h5 {
+    color: #333;
+    font-weight: bold;
+}
+
+.form-control {
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+}
+
+.btn {
+    width: 100%;
+    font-size: 16px;
+}
+
+.btn-warning {
+    background: #ffc107;
+    border-color: #ffc107;
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+}
+
+.btn-success:hover {
+    background: #157347;
+}
