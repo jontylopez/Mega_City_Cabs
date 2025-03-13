@@ -25,6 +25,9 @@ jobs:
         sudo apt update
         sudo apt install -y maven
 
+    - name: Navigate to the correct directory
+      run: cd restAPIMCCabs/Project\ Files  # Navigate to the directory where pom.xml is located
+
     - name: Build Project
       run: |
         mvn clean compile
@@ -36,9 +39,3 @@ jobs:
     - name: Package the Application
       run: |
         mvn package
-
-    - name: Upload Build Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: MegaCityCabs-Build
-        path: target/*.war
