@@ -14,7 +14,13 @@
         <title>Discount Manager | Mega City Cabs</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-
+        <style>
+            /* ✅ Search Bar */
+            .search-container {
+                max-width: 400px;
+                margin: 0 auto 20px auto;
+            }
+        </style>
     </head>
     <body class="p-4 bg-dark">
 
@@ -91,11 +97,14 @@
                             </form>
                         </div>
                     </div>
-
+                    <!-- 🔍 Search Bar -->
+                    <div class="search-container">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Search by ID, Name and Numbers..." onkeyup="filterDiscounts()">
+                    </div>
                     <!-- Active Discounts Table -->
                     <h5 class="text-center"><i class="bi bi-list-check"></i> Active Discounts</h5>
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover">
+                        <table class="table table-bordered table-hover" id="discountTable">
                             <thead class="table-dark">
                                 <tr>
                                     <th>ID</th>
@@ -116,7 +125,7 @@
                     <!-- Expired Discounts Table -->
                     <h5 class="text-center mt-4"><i class="bi bi-x-circle"></i> Expired Discounts</h5>
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover">
+                        <table class="table table-bordered table-hover" id="exDiscountTable">
                             <thead class="table-danger">
                                 <tr>
                                     <th>ID</th>

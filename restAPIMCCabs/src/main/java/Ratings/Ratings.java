@@ -6,7 +6,6 @@ public class Ratings {
 
     private int id;
     private int userId;
-    private int reservationId;
     private BigDecimal tripRating;
     private BigDecimal vehicleRating;
     private BigDecimal driverRating;
@@ -15,11 +14,10 @@ public class Ratings {
     public Ratings() {
     }
 
-    public Ratings(int id, int userId, int reservationId, BigDecimal tripRating,
+    public Ratings(int id, int userId, BigDecimal tripRating,
                    BigDecimal vehicleRating, BigDecimal driverRating, String comment) {
         this.id = id;
         this.userId = userId;
-        this.reservationId = reservationId;
         this.tripRating = tripRating;
         this.vehicleRating = vehicleRating;
         this.driverRating = driverRating;
@@ -41,14 +39,6 @@ public class Ratings {
 
     public void setUserId(int userId) {
         this.userId = userId;
-    }
-
-    public int getReservationId() {
-        return reservationId;
-    }
-
-    public void setReservationId(int reservationId) {
-        this.reservationId = reservationId;
     }
 
     public BigDecimal getTripRating() {
@@ -85,6 +75,7 @@ public class Ratings {
 
     // ✅ Compute Overall Rating (Backend Calculation)
     public BigDecimal getOverallRating() {
-        return tripRating.add(vehicleRating).add(driverRating).divide(BigDecimal.valueOf(3), 1, BigDecimal.ROUND_HALF_UP);
+        return tripRating.add(vehicleRating).add(driverRating)
+                .divide(BigDecimal.valueOf(3), 1, BigDecimal.ROUND_HALF_UP);
     }
 }

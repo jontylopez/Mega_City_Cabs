@@ -123,4 +123,20 @@ public class ReservationService {
         responseJson.addProperty("message", "Failed to update reservation status");
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(responseJson)).build();
     }
+    @PUT
+@Path("/updateRating/{reservationId}/{ratingId}")
+@Produces(MediaType.APPLICATION_JSON)
+public Response updateReservationRating(
+        @PathParam("reservationId") int reservationId,
+        @PathParam("ratingId") int ratingId) {
+    
+    int updated = reservationsCRUD.updateReservationRating(reservationId, ratingId);
+    if (updated > 0) {
+        return Response.ok("{\"message\": \"Reservation updated successfully\"}").build();
+    } else {
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("{\"message\": \"Failed to update reservation\"}")
+                .build();
+    }
+}
 }

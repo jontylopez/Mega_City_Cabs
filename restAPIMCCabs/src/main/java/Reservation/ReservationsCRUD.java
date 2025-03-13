@@ -190,4 +190,18 @@ public static Reservations getReservationById(int id) {
         }
         return -1;
     }
+    // ✅ Update Reservation with Rating ID
+public static int updateReservationRating(int reservationId, int ratingId) {
+    String query = "UPDATE reservations SET ratId=? WHERE id=?";
+    try (Connection conn = ConnectionHelper.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+        stmt.setInt(1, ratingId);
+        stmt.setInt(2, reservationId);
+        return stmt.executeUpdate();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return -1;
+}
+
 }

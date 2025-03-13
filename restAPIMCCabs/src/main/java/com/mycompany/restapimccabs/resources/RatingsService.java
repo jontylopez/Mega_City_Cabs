@@ -36,12 +36,6 @@ public class RatingsService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRatings() {
         List<Ratings> ratings = ratingsCRUD.getRatings();
-
-        // ✅ Compute Overall Rating for each rating and include it in response
-        ratings.forEach(rating -> {
-            rating.setComment(rating.getComment() + " | Overall Rating: " + rating.getOverallRating());
-        });
-
         return Response.ok(gson.toJson(ratings)).build();
     }
 
@@ -50,13 +44,9 @@ public class RatingsService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRatingById(@PathParam("id") int id) {
         Ratings rating = RatingsCRUD.getRatingById(id);
-
         if (rating != null) {
-            // ✅ Compute Overall Rating and include in response
-            rating.setComment(rating.getComment() + " | Overall Rating: " + rating.getOverallRating());
             return Response.ok(gson.toJson(rating)).build();
         }
-
         return Response.status(Response.Status.NOT_FOUND).build();
     }
 

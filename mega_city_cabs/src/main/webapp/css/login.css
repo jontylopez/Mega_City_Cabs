@@ -1,86 +1,165 @@
-/*
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
-*/
 /* 
-    Created on : Feb 6, 2025, 10:49:21 AM
-    Author     : Janith
+    Redesigned login.css for Mega City Cabs
+    Modern UI design with clean aesthetics
+    Created: March 2025
 */
 
-body{
-                background: #1a1a2e; /* Dark Navy Blue */
+body {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    font-family: 'Inter', 'Segoe UI', Roboto, -apple-system, sans-serif;
+}
 
-            }
-            /* Center the form with elevation */
-            .form-signin {
-                min-width: 450px;
-                padding: 20px;
-                margin: auto;
-                text-align: center;
-                elevation: 20px;
-                border-radius: 10px;
-                background: rgba(245, 245, 245, 0.95);
+/* Main form container */
+.form-signin {
+    width: 100%;
+    max-width: 420px;
+    min-width: auto;
+    padding: 2rem;
+    margin: auto;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    border: none;
+    backdrop-filter: blur(10px);
+}
 
-                border: 2px solid #ffcc00; /* Gold border to highlight */
-                box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2); /* Subtle shadow for elevation */
-            }
+/* Logo styling */
+.form-signin img {
+    width: 70px;
+    height: auto;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+    margin-bottom: 1.5rem;
+}
 
+/* Form headings */
+.form-signin h1 {
+    font-weight: 600;
+    color: #16213e;
+    margin-bottom: 1.5rem;
+    font-size: 1.75rem;
+}
 
+/* Input fields styling */
+.form-floating {
+    margin-bottom: 1.25rem;
+}
 
-            /* Custom Button */
-            .btn-custom {
-                background: #ffcc00;
-                color: black;
-                font-weight: bold;
-                border: none;
-                padding: 10px;
-                font-size: 18px;
-                transition: 0.3s;
-                border-radius: 5px;
-            }
-            .btn-custom:hover {
-                background: #ffaa00;
-                color: white;
-                box-shadow: 0px 4px 10px rgba(255, 204, 0, 0.5); /* Glow effect */
-            }
+.form-floating .form-control {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 1rem 0.75rem;
+    height: 3.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
 
-            /* Register Link */
-            .register-link {
-                margin-top: 15px;
-            }
-            .register-link a {
-                color: #ffcc00;
-                text-decoration: none;
-                font-weight: bold;
-                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8); /* Adds a soft black outline */
-            }
-            .register-link a:hover {
-                color: #ffaa00;
-                text-decoration: underline;
-                text-shadow: 2px 2px 5px rgba(0, 0, 0, 1); /* Slightly stronger shadow on hover */
-            }
-            /* Home Link */
-            .home-link {
-                text-align: center;
-                margin-bottom: 20px;
+.form-floating .form-control:focus {
+    border-color: #ffb703;
+    box-shadow: 0 0 0 4px rgba(255, 183, 3, 0.2);
+}
 
-            }
-            .home-link a {
-                color: #ffcc00;
-                font-weight: bold;
-                text-decoration: none;
-                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8); /* Adds a soft black outline */
-                font-size: 16px;
-                border-radius: 15px;
+.form-floating label {
+    padding: 1rem 0.75rem;
+    color: #6c757d;
+}
 
-            }
-            .home-link a:hover {
-                color: #ffaa00;
-                text-decoration: underline;
-                text-shadow: 2px 2px 5px rgba(0, 0, 0, 1); /* Slightly stronger shadow on hover */
-            }
-            /* Logo */
-            .form-signin img {
-                width: 80px;
-                height: auto;
-            }
+/* Custom button */
+.btn-custom {
+    background: #ffb703;
+    color: #16213e;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 0.75rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+    letter-spacing: 0.5px;
+}
+
+.btn-custom:hover {
+    background: #fb8500;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(251, 133, 0, 0.3);
+}
+
+/* Alert messages */
+#messageBox {
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Links styling */
+.register-link, .home-link {
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+    color: #4a4a4a;
+}
+
+.register-link a, .home-link a {
+    color: #fb8500;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.register-link a:hover, .home-link a:hover {
+    color: #ffb703;
+}
+
+.register-link a::after, .home-link a::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: #fb8500;
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.3s ease-out;
+}
+
+.register-link a:hover::after, .home-link a:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+}
+
+/* Home link specific */
+.home-link {
+    text-align: left;
+    margin-bottom: 2rem;
+}
+
+.home-link a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.home-link a::before {
+    content: '←';
+    font-size: 1.1rem;
+}
+
+/* Footer copyright */
+.text-body-secondary {
+    color: #6c757d;
+    font-size: 0.85rem;
+    margin-top: 2rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .form-signin {
+        max-width: 90%;
+        padding: 1.5rem;
+    }
+    
+    .form-signin h1 {
+        font-size: 1.5rem;
+    }
+}

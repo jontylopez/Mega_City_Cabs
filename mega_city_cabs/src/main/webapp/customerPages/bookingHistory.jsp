@@ -48,7 +48,42 @@
                     </tbody>
                 </table>
             </div>
+
+
+
         </div>
+        <!-- 🔹 Rating Modal -->
+        <div id="ratingModal" class="modal-overlay" style="display: none;">
+            <div class="modal-box">
+                <span class="close" onclick="closeRatingModal()">&times;</span>
+                <h4><i class="bi bi-star-fill"></i> Rate Your Trip</h4>
+                <hr>
+
+                <input type="hidden" id="ratingReservationId">
+
+                <label>Trip Rating:</label>
+                <input type="number" class="form-control" id="tripRating" min="1" max="5" step="0.1">
+
+                <label>Vehicle Rating:</label>
+                <input type="number" class="form-control" id="vehicleRating" min="1" max="5" step="0.1">
+
+                <label>Driver Rating:</label>
+                <input type="number" class="form-control" id="driverRating" min="1" max="5" step="0.1">
+
+                <label>Comment:</label>
+                <textarea id="ratingComment" class="form-control" rows="3"></textarea>
+
+                <div class="modal-buttons text-center">
+                    <button class="btn btn-success" onclick="submitRating()">
+                        <i class="bi bi-check-circle"></i> Submit Rating
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeRatingModal()">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <script src="../js/customer.js"></script>
     </body>
 </html>

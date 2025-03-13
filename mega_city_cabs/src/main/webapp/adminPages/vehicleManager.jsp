@@ -15,6 +15,13 @@
         <title>Vehicle Manager | Mega City Cabs</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+        <style>
+            /* ✅ Search Bar */
+            .search-container {
+                max-width: 400px;
+                margin: 0 auto 20px auto;
+            }
+        </style>
     </head>
     <body class="p-4">
 
@@ -64,12 +71,15 @@
                 </div>
             </div>
 
-
+            <!-- 🔍 Search Bar -->
+            <div class="search-container">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search by ID, Name and Numbers..." onkeyup="filterVehicles()">
+            </div>
             <!-- Vehicle List -->
             <div class="card shadow-sm">
                 <div class="card-header bg-dark text-white">Vehicle List</div>
                 <div class="card-body">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="vehicleTable">
                         <thead class="table-dark">
                             <tr>
                                 <th>ID</th>

@@ -131,6 +131,7 @@ const vehicleApiUrl = "http://localhost:8080/restAPIMCCabs/api/vehicles/";
 const driverApiUrl = "http://localhost:8080/restAPIMCCabs/api/drivers/";
 const discountApiUrl = "http://localhost:8080/restAPIMCCabs/api/discounts/";
 const userApiUrl = "http://localhost:8080/restAPIMCCabs/api/users/";
+const ratingApiUrl = "http://localhost:8080/restAPIMCCabs/api/ratings/";
 const reservationApiUrl = "http://localhost:8080/restAPIMCCabs/api/reservations/";
 const reservationFinalizeApiUrl = "http://localhost:8080/restAPIMCCabs/api/reservation_finalize/";  
 
@@ -1081,7 +1082,7 @@ async function deleteUser(id) {
 // ==========================================
 
 /**
- * ✅ Load All Reservations
+ * ✅ Load All Reservations (Now Includes Rating Column)
  */
 async function loadAllReservations() {
     console.log("📌 Fetching all reservations...");
@@ -1092,7 +1093,7 @@ async function loadAllReservations() {
         return;
     }
 
-    tableBody.innerHTML = `<tr><td colspan="8" class="text-center">Loading...</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="9" class="text-center">Loading...</td></tr>`;
 
     try {
         const response = await fetch(reservationApiUrl + "all");
@@ -1102,7 +1103,7 @@ async function loadAllReservations() {
         console.log("✅ All Reservations:", reservations);
 
         if (reservations.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="8" class="text-center">No reservations found.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="9" class="text-center">No reservations found.</td></tr>`;
             return;
         }
 
@@ -1118,8 +1119,16 @@ async function loadAllReservations() {
             // ✅ Fetch Category & Driver only after vehicle is fetched
             const categoryPromise = vehicle.catId ? fetch(categoryApiUrl + vehicle.catId).then(res => res.ok ? res.json() : { catName: "Unknown Category" }) : { catName: "Unknown Category" };
             const driverPromise = reservation.driverId ? fetch(driverApiUrl + reservation.driverId).then(res => res.ok ? res.json() : { dName: "Not Assigned" }) : { dName: "Not Assigned" };
+            const ratingPromise = reservation.ratId ? fetch(`${ratingApiUrl}${reservation.ratId}`).then(res => res.ok ? res.json() : null) : null;
 
-            const [category, driver] = await Promise.all([categoryPromise, driverPromise]);
+            const [category, driver, rating] = await Promise.all([categoryPromise, driverPromise, ratingPromise]);
+
+            // ✅ Determine Rating Column Value
+            let ratingColumn = "N/A";
+            if (rating) {
+                const overallRating = ((rating.tripRating + rating.vehicleRating + rating.driverRating) / 3).toFixed(1);
+                ratingColumn = `<a href="#" onclick="openRatingModal(${reservation.ratId})">${overallRating} ⭐</a>`;
+            }
 
             // ✅ Add row to table
             const row = `
@@ -1132,6 +1141,7 @@ async function loadAllReservations() {
                     <td>${reservation.endDate}</td>
                     <td>Rs. ${reservation.finalPrice ? reservation.finalPrice.toFixed(2) : "N/A"}</td>
                     <td><span class="status-badge ${reservation.stat.toLowerCase()}">${reservation.stat}</span></td>
+                    <td>${ratingColumn}</td>
                 </tr>`;
 
             tableBody.innerHTML += row;
@@ -1139,23 +1149,73 @@ async function loadAllReservations() {
 
     } catch (error) {
         console.error("🚨 Error fetching reservations:", error);
-        tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Failed to load reservations.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="9" class="text-center text-danger">Failed to load reservations.</td></tr>`;
     }
 }
 
+function openRatingModal(ratingId) {
+    fetch(`${ratingApiUrl}${ratingId}`)
+        .then(response => response.json())
+        .then(rating => {
+            document.getElementById("modalTripRating").innerText = rating.tripRating + " ⭐";
+            document.getElementById("modalVehicleRating").innerText = rating.vehicleRating + " ⭐";
+            document.getElementById("modalDriverRating").innerText = rating.driverRating + " ⭐";
+            document.getElementById("modalRatingComment").value = rating.comment || "No comments provided.";
+            
+            // Show modal
+            document.getElementById("ratingModal").style.display = "flex";
+            
+            // Force reflow and prevent scroll on body
+            document.body.style.overflow = "hidden";
+        })
+        .catch(error => {
+            console.error("🚨 Error fetching rating details:", error);
+            alert("❌ Error loading rating details.");
+        });
+}
+
+function closeRatingModal() {
+    document.getElementById("ratingModal").style.display = "none";
+    
+    // Re-enable scrolling
+    document.body.style.overflow = "";
+}
+
+
 /**
- * ✅ Filter Reservations
+ * ✅ Filters
  */
-function filterReservations() {
+function filterTable(tableId) {
     const input = document.getElementById("searchInput").value.toLowerCase();
-    const rows = document.querySelectorAll("#reservationTable tr");
+    const rows = document.querySelectorAll(`#${tableId} tr`);
 
     rows.forEach(row => {
         const text = row.innerText.toLowerCase();
         row.style.display = text.includes(input) ? "" : "none";
     });
 }
+function filterReservations() {
+    filterTable("reservationTable");
+}
 
+function filterCategories() {
+    filterTable("categoryTable");
+}
+
+function filterVehicles() {
+    filterTable("vehicleTable");
+}
+
+function filterDrivers() {
+    filterTable("driverTable");
+}
+
+function filterDiscounts() {
+    filterTable("discountTable");
+}
+function filterUsers() {
+    filterTable("userTable");
+}
 
 async function loadPendingReservations() {
     console.log("📌 Fetching all reservations...");
@@ -1271,9 +1331,6 @@ function calculateAdditionalCharges(category) {
     document.getElementById("calculatedCharges").innerText = `Rs. ${totalExtraCharge.toFixed(2)}`;
 }
 
-/**
- * ✅ Finalize Reservation
- */
 /**
  * ✅ Finalize Reservation
  */

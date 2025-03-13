@@ -62,6 +62,10 @@ function loadPage(url) {
                     console.log("📌 Profile Page Loaded! Fetching user details...");
                     setTimeout(loadUserProfile, 500);  // Ensure it runs after content is loaded
                 }
+                if (url.includes("customerHelp.jsp")) {
+                    console.log("📌 Help Page Loaded! Fetching Help details...");
+                    loadHelpData();
+                }
             })
             .catch(error => console.error("❌ Error loading page:", error));
 }
@@ -85,11 +89,31 @@ const vehicleApiUrl = "http://localhost:8080/restAPIMCCabs/api/vehicles";
 const driverApiUrl = "http://localhost:8080/restAPIMCCabs/api/drivers/";
 const discountApiUrl = "http://localhost:8080/restAPIMCCabs/api/discounts/";
 const categoryApiUrl = "http://localhost:8080/restAPIMCCabs/api/categories";
+const ratingApiUrl = "http://localhost:8080/restAPIMCCabs/api/ratings";
 const jointApiUrl = "http://localhost:8080/restAPIMCCabs/api/joint";
 const vehicleAvailabilityApiUrl = "http://localhost:8080/restAPIMCCabs/api/vehicle_availability/";
 const driverAvailabilityApiUrl = "http://localhost:8080/restAPIMCCabs/api/driver_availability/";
 const discountAvailabilityApiUrl = "http://localhost:8080/restAPIMCCabs/api/discount_availability/";
 const reservationFinalizeApiUrl = "http://localhost:8080/restAPIMCCabs/api/reservation_finalize";
+
+function isValidFutureDate(inputDate) {
+    const formattedDate = formatDate(inputDate.value);
+    const today = new Date().toISOString().split("T")[0];
+
+    if (!formattedDate || formattedDate <= today) {
+        alert("❌ Selected date must be a future date!");
+        return false;
+    }
+    return true;
+}
+function formatDate(dateString) {
+    if (!dateString)
+        return null;
+    const date = new Date(dateString);
+    if (isNaN(date.getTime()))
+        return null;
+    return date.toISOString().split("T")[0];
+}
 // ==========================================
 // 🔹 CATEGORY MANAGEMENT FOR BOOKING PAGE
 // ==========================================
@@ -303,13 +327,25 @@ function updateBookingDate() {
  */
 async function checkAvailability() {
     const categoryId = document.getElementById("selectedCategoryId").value;
-    const startDate = document.getElementById("bookingDate").value;
-    let endDate = document.getElementById("endDate").value || startDate;
+    const startDateInput = document.getElementById("bookingDate");
+    const endDateInput = document.getElementById("endDate");
 
-    if (!categoryId || !startDate) {
+
+    if (!categoryId || !startDateInput.value) {
         alert("❌ Please select a category and a booking date!");
         return;
     }
+    // ✅ Validate start date
+    if (!isValidFutureDate(startDateInput)) {
+        return;
+    }
+
+    // ✅ Validate end date if provided
+    if (endDateInput.value && !isValidFutureDate(endDateInput)) {
+        return;
+    }
+    let startDate = startDateInput.value;
+    let endDate = endDateInput.value || startDate;
 
     console.log("🔍 Checking availability for Category:", categoryId, "From:", startDate, "To:", endDate);
 
@@ -434,7 +470,7 @@ function showBookingSummary() {
  * ✅ Generate & Download Booking Summary as PDF
  */
 function downloadBookingSummaryPDF() {
-    const { jsPDF } = window.jspdf; // Ensure jsPDF is available
+    const {jsPDF} = window.jspdf; // Ensure jsPDF is available
 
     // Extract details from the summary
     const categoryName = document.getElementById("summaryCategory").innerText;
@@ -460,12 +496,12 @@ function downloadBookingSummaryPDF() {
     let y = 40; // Initial Y position for details
 
     const details = [
-        { label: "Category", value: categoryName },
-        { label: "Start Date", value: startDate },
-        { label: "End Date", value: endDate },
-        { label: "Number of Days", value: numberOfDays },
-        { label: "Total Amount", value: `Rs ${totalAmount}` },
-        { label: "Discount", value: discountText },
+        {label: "Category", value: categoryName},
+        {label: "Start Date", value: startDate},
+        {label: "End Date", value: endDate},
+        {label: "Number of Days", value: numberOfDays},
+        {label: "Total Amount", value: `Rs ${totalAmount}`},
+        {label: "Discount", value: discountText},
     ];
 
     details.forEach(detail => {
@@ -688,12 +724,22 @@ async function loadTripDetails(userId = null) {
         if (elements.tripStatus)
             elements.tripStatus.value = nextTrip.stat || "";
 
-        if (elements.tripDiscount) {
-            elements.tripDiscount.value = nextTrip.dissId ? `${nextTrip.dissId}%` : "No Discount";
-        }
-
-        if (elements.tripFinalPrice) {
-            elements.tripFinalPrice.value = nextTrip.finalPrice ? `Rs ${parseFloat(nextTrip.finalPrice).toFixed(2)}` : "Not Finalized";
+        // ✅ Fetch discount percentage if applicable
+        if (nextTrip.dissId) {
+            try {
+                const discountResponse = await fetch(`${discountApiUrl}${nextTrip.dissId}`);
+                if (discountResponse.ok) {
+                    const discountData = await discountResponse.json();
+                    elements.tripDiscount.value = `${discountData.percentage}% OFF`; // ✅ Show percentage
+                } else {
+                    elements.tripDiscount.value = "No Discount"; // If discount fetch fails
+                }
+            } catch (error) {
+                console.error("🚨 Error fetching discount details:", error);
+                elements.tripDiscount.value = "No Discount";
+            }
+        } else {
+            elements.tripDiscount.value = "No Discount";
         }
 
     } catch (error) {
@@ -854,6 +900,14 @@ async function loadBookingHistory() {
                     Cancel
                    </button>`
                     : `<span class="text-muted">N/A</span>`;
+            // ✅ Add "Rate Trip" button only if `stat = Finalized` AND `ratId = null`
+            let rateButton = "";
+            if (reservation.stat === "Finalized" && !reservation.ratId) {
+                rateButton = `
+                    <button class="btn btn-warning btn-sm" onclick="openRatingModal(${reservation.id})">
+                        <i class="bi bi-star-fill"></i> Rate Trip
+                    </button>`;
+            }
 
             // ✅ Create Row with Status Column
             const row = `
@@ -867,7 +921,8 @@ async function loadBookingHistory() {
                     <td>${reservation.endDate || "N/A"}</td>
                     <td>${discountPercentage}</td>
                     <td><span class="status-badge ${reservation.stat.toLowerCase()}">${reservation.stat}</span></td>
-                    <td>${actionButton}</td>
+                    <td>${actionButton}
+                            ${rateButton}</td>
                 </tr>
             `;
             bookingHistoryTable.innerHTML += row;
@@ -880,6 +935,81 @@ async function loadBookingHistory() {
         `;
     }
 }
+function openRatingModal(reservationId) {
+    document.getElementById("ratingReservationId").value = reservationId;
+    document.getElementById("ratingModal").style.display = "flex"; // ✅ Open modal as floating overlay
+}
+
+function closeRatingModal() {
+    document.getElementById("ratingModal").style.display = "none"; // ✅ Close modal
+}
+
+async function submitRating() {
+    const userId = getSessionUserId();
+    const reservationId = document.getElementById("ratingReservationId").value;
+    const tripRating = parseFloat(document.getElementById("tripRating").value);
+    const vehicleRating = parseFloat(document.getElementById("vehicleRating").value);
+    const driverRating = parseFloat(document.getElementById("driverRating").value);
+    const comment = document.getElementById("ratingComment").value.trim();
+
+    if (!tripRating || !vehicleRating || !driverRating) {
+        alert("⚠️ Please provide all ratings (Trip, Vehicle, Driver).");
+        return;
+    }
+
+    const ratingData = {
+        userId: userId,
+        tripRating: tripRating,
+        vehicleRating: vehicleRating,
+        driverRating: driverRating,
+        comment: comment
+    };
+
+    try {
+        // ✅ Submit the rating to the API
+        const response = await fetch(`${ratingApiUrl}/create`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(ratingData)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert("✅ Rating submitted successfully!");
+
+            // ✅ Update the reservation's ratId with the new rating ID
+            if (result.ratingId) {
+                await updateReservationWithRating(reservationId, result.ratingId);
+            }
+
+            closeRatingModal();
+        } else {
+            alert("❌ Failed to submit rating.");
+            console.error("Error:", result);
+        }
+    } catch (error) {
+        console.error("🚨 Error submitting rating:", error);
+        alert("❌ Error submitting rating. Please try again.");
+    }
+}
+
+async function updateReservationWithRating(reservationId, ratingId) {
+    try {
+        const response = await fetch(`${reservationApiUrl}updateRating/${reservationId}/${ratingId}`, {
+            method: "PUT"
+        });
+
+        if (response.ok) {
+            console.log("✅ Reservation updated with rating ID:", ratingId);
+            loadBookingHistory(); // Refresh list
+        } else {
+            console.error("🚨 Failed to update reservation.");
+        }
+    } catch (error) {
+        console.error("🚨 Error updating reservation:", error);
+    }
+}
+
 
 /**
  * ✅ Utility Function: Fetch API Data
@@ -922,7 +1052,8 @@ async function loadUserProfile() {
 
     try {
         const response = await fetch(`${userApiUrl}/${userId}`); // ✅ Fixed URL
-        if (!response.ok) throw new Error("🚨 Failed to fetch user data!");
+        if (!response.ok)
+            throw new Error("🚨 Failed to fetch user data!");
 
         const user = await response.json();
         console.log("✅ User Data:", user);
@@ -949,9 +1080,6 @@ async function loadUserProfile() {
 }
 
 /**
- * ✅ Update Contact Information
- */
-/**
  * ✅ Update Contact Information (Email, Phone, Address)
  */
 async function updateProfile(event) {
@@ -967,9 +1095,9 @@ async function updateProfile(event) {
     console.log("📌 Sending Profile Update:", updatedUser);
 
     try {
-        const response = await fetch(`${userApiUrl}/${userId}/updateContact`, { // ✅ Corrected API Endpoint
+        const response = await fetch(`${userApiUrl}/${userId}/updateContact`, {// ✅ Corrected API Endpoint
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(updatedUser)
         });
 
@@ -1003,14 +1131,14 @@ async function changePassword(event) {
         return;
     }
 
-    const passwordData = { currentPassword, newPassword };
+    const passwordData = {currentPassword, newPassword};
 
     console.log("📌 Sending Password Change Request:", passwordData);
 
     try {
-        const response = await fetch(`${userApiUrl}/${userId}/changePassword`, { // ✅ Corrected API Endpoint
+        const response = await fetch(`${userApiUrl}/${userId}/changePassword`, {// ✅ Corrected API Endpoint
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(passwordData)
         });
 
@@ -1033,7 +1161,7 @@ async function changePassword(event) {
  */
 async function loadPendingPayments() {
     console.log("📌 Fetching pending payments...");
-    
+
     const tableBody = document.getElementById("pendingPaymentsTable");
     const pendingPaymentsSection = document.querySelector(".pending-payments-section"); // Get the section
 
@@ -1046,7 +1174,8 @@ async function loadPendingPayments() {
 
     try {
         const response = await fetch(`${reservationFinalizeApiUrl}/all`);
-        if (!response.ok) throw new Error("Failed to fetch payments.");
+        if (!response.ok)
+            throw new Error("Failed to fetch payments.");
 
         let pendingPayments = await response.json();
         pendingPayments = pendingPayments.filter(payment => payment.stat === "Pending");
@@ -1089,12 +1218,14 @@ async function viewPendingPayment(finalizeId, resId) {
     try {
         // Fetch reservation finalization details
         const finalizeResponse = await fetch(`${reservationFinalizeApiUrl}/${finalizeId}`);
-        if (!finalizeResponse.ok) throw new Error("Failed to fetch finalize details.");
+        if (!finalizeResponse.ok)
+            throw new Error("Failed to fetch finalize details.");
         const finalizeData = await finalizeResponse.json();
 
         // Fetch reservation details
         const reservationResponse = await fetch(`${reservationApiUrl}reservation/${resId}`);
-        if (!reservationResponse.ok) throw new Error("Failed to fetch reservation details.");
+        if (!reservationResponse.ok)
+            throw new Error("Failed to fetch reservation details.");
         const reservationData = await reservationResponse.json();
 
         // Fill modal data
@@ -1122,26 +1253,29 @@ async function viewPendingPayment(finalizeId, resId) {
  * ✅ Mark Payment as Completed
  */
 async function payPendingPayment(finalizeId, resId) {
-    if (!confirm("Are you sure you want to pay for this trip?")) return;
+    if (!confirm("Are you sure you want to pay for this trip?"))
+        return;
 
     try {
         // 🔹 Update reservation_finalize to Paid
         const finalizeResponse = await fetch(`${reservationFinalizeApiUrl}/updateStatus/${finalizeId}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ stat: "Paid" })
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({stat: "Paid"})
         });
 
-        if (!finalizeResponse.ok) throw new Error("Failed to update finalize status!");
+        if (!finalizeResponse.ok)
+            throw new Error("Failed to update finalize status!");
 
         // 🔹 Update reservation status to Finalized
         const reservationResponse = await fetch(`${reservationApiUrl}updateStatus/${resId}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ stat: "Finalized" })
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({stat: "Finalized"})
         });
 
-        if (!reservationResponse.ok) throw new Error("Failed to update reservation status!");
+        if (!reservationResponse.ok)
+            throw new Error("Failed to update reservation status!");
 
         alert("✅ Payment successful! Your trip has been finalized.");
         loadPendingPayments(); // Refresh the table
@@ -1155,3 +1289,68 @@ async function payPendingPayment(finalizeId, resId) {
     }
 }
 
+let currentStep = 0;
+
+// Step-by-step instructions
+const helpInstructions = [
+    "Welcome to Mega City Cabs! Follow this guide to learn how to use the platform.",
+    "Step 1: Click on 'Book a Ride' to start your booking process.",
+    "Step 2: Select a category based on your needs (Budget, Car, Van,..).",
+    "Step 3: Choose either Per Day or Per Mileage booking type.",
+    "Step 4: Enter your trip details, including start and end date.",
+    "Step 5: Apply any available discount to reduce your fare.",
+    "Step 6: Check vehicle and driver availability before proceeding.",
+    "Step 7: Confirm your booking and make the payment.",
+    "Step 8: Track your trip and manage your reservations in the dashboard.",
+    "Step 9: You can check Your all the previous booking Details in Booking History Section.",
+    "Step 10: You Can Free cancel your trip anytime before the trip date.",
+    "Thank you for using Mega City Cabs! We hope you have a great experience."
+];
+
+// Image filenames (Assuming images are named img1.jpg, img2.jpg, ...)
+const helpImages = [
+    "../images/img1.png",
+    "../images/img2.png",
+    "../images/img3.png",
+    "../images/img4.png",
+    "../images/img5.png",
+    "../images/img6.png",
+    "../images/img7.png",
+    "../images/img8.png",
+    "../images/img9.png",
+    "../images/img10.png",
+    "../images/img11.png",
+    "../images/img12.png"
+];
+
+function loadHelpData() {
+    if (!document.getElementById("helpImage") || !document.getElementById("helpText")) {
+        console.error("❌ Help elements not found! Check your JSP file.");
+        return;
+    }
+
+    updateHelpContent();
+}
+
+function updateHelpContent() {
+    document.getElementById("helpImage").src = helpImages[currentStep];
+    document.getElementById("helpText").innerText = helpInstructions[currentStep];
+
+    // Enable/Disable navigation buttons
+    document.getElementById("prevBtn").disabled = currentStep === 0;
+    document.getElementById("nextBtn").disabled = currentStep === helpInstructions.length - 1;
+}
+
+function nextStep() {
+    if (currentStep < helpInstructions.length - 1) {
+        currentStep++;
+        updateHelpContent();
+    }
+}
+
+function prevStep() {
+    if (currentStep > 0) {
+        currentStep--;
+        updateHelpContent();
+    }
+}

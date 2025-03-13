@@ -41,7 +41,8 @@
                     <strong id="userText">User</strong>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-                    <li><a class="dropdown-item profile-link" href="../userPages/profile.jsp">Profile</a></li>
+                    <li><a class="dropdown-item profile-link" href="../customerPages/customerProfile.jsp">Profile</a></li>
+                    <li><a class="dropdown-item profile-link" href="../customerPages/customerHelp.jsp">Help</a></li> <!-- ✅ Added Help Link -->
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="#" onclick="logout()">Sign out</a></li>
                 </ul>
@@ -52,7 +53,7 @@
         <div class="main-content"></div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        
+
         <script src="../js/customer.js" defer></script>
 
     </body>
