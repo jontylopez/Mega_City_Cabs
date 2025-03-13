@@ -429,6 +429,70 @@ function showBookingSummary() {
     document.getElementById("bookingSummary").style.display = "flex";
 }
 
+
+/**
+ * ✅ Generate & Download Booking Summary as PDF
+ */
+function downloadBookingSummaryPDF() {
+    const { jsPDF } = window.jspdf; // Ensure jsPDF is available
+
+    // Extract details from the summary
+    const categoryName = document.getElementById("summaryCategory").innerText;
+    const startDate = document.getElementById("summaryStartDate").innerText;
+    const endDate = document.getElementById("summaryEndDate").innerText;
+    const numberOfDays = document.getElementById("summaryDays").innerText;
+    const totalAmount = document.getElementById("summaryAmount").innerText;
+    const discountText = document.getElementById("summaryDiscount") ? document.getElementById("summaryDiscount").innerText : "No Discount Applied";
+
+    // ✅ Create a new PDF document
+    const doc = new jsPDF();
+
+    // ✅ Add Header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Mega City Cabs - Booking Summary", 15, 20);
+    doc.setFontSize(12);
+    doc.text("Thank you for booking with Mega City Cabs!", 15, 28);
+
+    // ✅ Add Booking Details
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    let y = 40; // Initial Y position for details
+
+    const details = [
+        { label: "Category", value: categoryName },
+        { label: "Start Date", value: startDate },
+        { label: "End Date", value: endDate },
+        { label: "Number of Days", value: numberOfDays },
+        { label: "Total Amount", value: `Rs ${totalAmount}` },
+        { label: "Discount", value: discountText },
+    ];
+
+    details.forEach(detail => {
+        doc.text(`${detail.label}: ${detail.value}`, 15, y);
+        y += 8;
+    });
+
+    // ✅ Add Terms & Conditions
+    doc.setFont("helvetica", "bold");
+    doc.text("Terms & Conditions:", 15, y + 10);
+    doc.setFont("helvetica", "normal");
+    const terms = [
+        "• Full amount will be charged upon confirmation.",
+        "• Additional kilometers will be charged separately.",
+        "• Waiting charges apply if included hours are exceeded.",
+        "• No refund for cancellations within 24 hours.",
+    ];
+
+    y += 18;
+    terms.forEach(term => {
+        doc.text(term, 15, y);
+        y += 6;
+    });
+
+    // ✅ Save & Download PDF
+    doc.save(`Booking_Summary_${startDate}.pdf`);
+}
 /**
  * ✅ Update the Discount Section in Booking Summary
  */
@@ -511,7 +575,7 @@ async function reserveBooking() {
 
         if (response.ok) {
             alert("✅ Booking Reserved Successfully!");
-            loadPage("bookingHistory.jsp");
+            loadPage("customerDash.jsp");
         } else {
             alert("❌ Failed to reserve booking! Please try again.");
         }
@@ -969,10 +1033,12 @@ async function changePassword(event) {
  */
 async function loadPendingPayments() {
     console.log("📌 Fetching pending payments...");
+    
     const tableBody = document.getElementById("pendingPaymentsTable");
+    const pendingPaymentsSection = document.querySelector(".pending-payments-section"); // Get the section
 
-    if (!tableBody) {
-        console.error("🚨 'pendingPaymentsTable' element not found!");
+    if (!tableBody || !pendingPaymentsSection) {
+        console.error("🚨 'pendingPaymentsTable' or 'pending-payments-section' not found!");
         return;
     }
 
@@ -986,8 +1052,10 @@ async function loadPendingPayments() {
         pendingPayments = pendingPayments.filter(payment => payment.stat === "Pending");
 
         if (pendingPayments.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="3" class="text-center">No pending payments.</td></tr>`;
+            pendingPaymentsSection.style.display = "none"; // ✅ Hide section if no pending payments
             return;
+        } else {
+            pendingPaymentsSection.style.display = "block"; // ✅ Show section if payments exist
         }
 
         tableBody.innerHTML = "";
@@ -1086,11 +1154,4 @@ async function payPendingPayment(finalizeId, resId) {
         alert("🚨 Payment failed! Try again.");
     }
 }
-
-/**
- * ✅ Initialize Pending Payments on Page Load
- */
-document.addEventListener("DOMContentLoaded", () => {
-    loadPendingPayments();
-});
 

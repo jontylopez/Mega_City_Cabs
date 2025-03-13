@@ -8,6 +8,8 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
         <link rel="stylesheet" href="../css/booking.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     </head>
     <body class="p-4 bg-dark">
 
@@ -187,7 +189,7 @@
 
                 <!-- Buttons -->
                 <div class="modal-buttons text-center">
-                    <button id="confirmPayBtn" class="btn btn-success" disabled onclick="confirmPayment()">
+                    <button id="confirmPayBtn" class="btn btn-success" disabled onclick="confirmPayment(); downloadBookingSummaryPDF();">
                         <i class="bi bi-check-circle"></i> Confirm & Pay
                     </button>
                     <button class="btn btn-secondary" onclick="closeBookingSummary()">

@@ -134,6 +134,17 @@ const userApiUrl = "http://localhost:8080/restAPIMCCabs/api/users/";
 const reservationApiUrl = "http://localhost:8080/restAPIMCCabs/api/reservations/";
 const reservationFinalizeApiUrl = "http://localhost:8080/restAPIMCCabs/api/reservation_finalize/";  
 
+function isValidFutureDate(inputDate) {
+    const formattedDate = formatDate(inputDate.value);
+    const today = new Date().toISOString().split("T")[0];
+
+    if (!formattedDate || formattedDate <= today) {
+        alert("❌ Selected date must be a future date!");
+        return false;
+    }
+    return true;
+}
+
 // ==========================================
 // 🔹 CATEGORY MANAGEMENT FUNCTIONS
 // ==========================================
@@ -413,17 +424,22 @@ function populateDropdown(dropdownId, categories) {
     });
 }
 
+
 async function createVehicle(event) {
     if (event)
         event.preventDefault();
 
     const categorySelect = document.getElementById("vehicleCategory");
     const catId = parseInt(categorySelect.value);
+    const regExpDateInput = document.getElementById("regExpDate");
+
+    // 🚨 Validate Registration Expiry Date
+    if (!isValidFutureDate(regExpDateInput)) return;
 
     const vehicle = {
         catId: catId,
         vehicleNo: document.getElementById("vehicleNo").value.trim(),
-        regExpDate: formatDate(document.getElementById("regExpDate").value),
+        regExpDate: formatDate(regExpDateInput.value),
         stat: "Active"
     };
 
@@ -617,12 +633,17 @@ async function updateDriverTable() {
  * ✅ Create a New Driver
  */
 async function createDriver() {
+    const dLExpDateInput = document.getElementById("dLExpDate");
+
+    // 🚨 Validate Driver License Expiry Date
+    if (!isValidFutureDate(dLExpDateInput)) return;
+
     const driver = {
         dName: document.getElementById("dName").value.trim(),
         dAddress: document.getElementById("dAddress").value.trim(),
         dTel: document.getElementById("dTel").value.trim(),
         dLNum: document.getElementById("dLNum").value.trim(),
-        dLExpDate: document.getElementById("dLExpDate").value,
+        dLExpDate: formatDate(dLExpDateInput.value),
         stat: "Active"
     };
 
@@ -651,6 +672,7 @@ async function createDriver() {
         alert("🚨 Server error! Please try again.");
     }
 }
+
 
 /**
  * ✅ Edit a Driver (Pre-fill update form)
@@ -740,21 +762,24 @@ async function deleteDriver(id) {
 // 🔹 DISCOUNT MANAGEMENT FUNCTIONS
 // ==========================================
 
-// 🔹 Fetch and Load Discounts (Both Active & Expired)
+// 🔹 Fetch and Load Discounts (Filtering Active Discounts on Frontend)
 async function loadDiscounts() {
-    console.log("📌 Fetching Discounts...");
+    console.log("📌 Fetching All Discounts...");
 
     try {
-        const response = await fetch("http://localhost:8080/restAPIMCCabs/api/discounts/active");
+        const response = await fetch(`${discountApiUrl}`); // Fetch ALL discounts
         if (!response.ok)
             throw new Error(`❌ HTTP Error: ${response.status}`);
 
-        const discounts = await response.json();
-        console.log("✅ API Response Data:", discounts);
+        let discounts = await response.json();
+        console.log("✅ Full API Response Data:", discounts);
+
+        // 🔹 Filter Active Discounts
+        const activeDiscounts = discounts.filter(discount => discount.dStatus === "Active");
+        console.log(`📌 After Filtering: ${activeDiscounts.length} Active Discounts`);
 
         const tableBody = document.getElementById("discountTableBody");
 
-        // 🔹 Check if the element exists before updating
         if (!tableBody) {
             console.error("❌ Element 'discountTableBody' not found! Make sure the ID is correct in the HTML.");
             return;
@@ -762,10 +787,10 @@ async function loadDiscounts() {
 
         tableBody.innerHTML = ""; // ✅ Clear existing data
 
-        discounts.forEach(discount => {
+        activeDiscounts.forEach(discount => {
             const row = `
             <tr>
-            <td>${discount.id}</td>
+                <td>${discount.id}</td>
                 <td>${discount.diskId}</td>
                 <td>${discount.percentage}%</td>
                 <td>${discount.startDate}</td>
@@ -784,6 +809,7 @@ async function loadDiscounts() {
         });
 
         console.log("✅ Discounts Table Updated!");
+
     } catch (error) {
         console.error("🚨 Fetch Error:", error);
     }
@@ -797,7 +823,7 @@ async function loadExpiredDiscounts() {
     console.log("📌 Fetching Expired Discounts...");
 
     try {
-        const response = await fetch("http://localhost:8080/restAPIMCCabs/api/discounts/expired");
+        const response = await fetch(`${discountApiUrl}expired`);
         if (!response.ok)
             throw new Error(`❌ HTTP Error: ${response.status}`);
 
@@ -831,22 +857,24 @@ async function loadExpiredDiscounts() {
         console.error("🚨 Fetch Error:", error);
     }
 }
-// 🔹 Add New Discount
 async function addDiscount() {
     const percentage = document.getElementById("discountPercentage").value;
-    const startDate = document.getElementById("startDate").value;
-    const endDate = document.getElementById("endDate").value;
+    const startDateInput = document.getElementById("startDate");
+    const endDateInput = document.getElementById("endDate");
     const dStatus = document.getElementById("discountStatus").value;
 
-    if (!percentage || !startDate || !endDate) {
-        alert("❌ Please fill in all fields!");
-        return;
-    }
+    // 🚨 Validate Start and End Dates
+    if (!isValidFutureDate(startDateInput) || !isValidFutureDate(endDateInput)) return;
 
-    const discountData = {percentage, startDate, endDate, dStatus};
+    const discountData = {
+        percentage,
+        startDate: formatDate(startDateInput.value),
+        endDate: formatDate(endDateInput.value),
+        dStatus
+    };
 
     try {
-        const response = await fetch("http://localhost:8080/restAPIMCCabs/api/discounts/create", {
+        const response = await fetch(discountApiUrl + "create", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(discountData),
@@ -898,7 +926,7 @@ async function submitDiscountUpdate() {
     const discountData = {percentage, startDate, endDate, dStatus}; // ✅ Include dStatus
 
     try {
-        const response = await fetch(`http://localhost:8080/restAPIMCCabs/api/discounts/${id}`, {
+        const response = await fetch(`${discountApiUrl}${id}`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(discountData),
@@ -936,7 +964,7 @@ async function deleteDiscount(id) {
         return;
 
     try {
-        const response = await fetch(`http://localhost:8080/restAPIMCCabs/api/discounts/${id}`, {
+        const response = await fetch(`${discountApiUrl}${id}`, {
             method: "DELETE",
         });
 
@@ -960,7 +988,7 @@ async function loadUsers() {
     console.log("📌 Fetching users...");
 
     try {
-        const response = await fetch("http://localhost:8080/restAPIMCCabs/api/users");
+        const response = await fetch(userApiUrl);
         if (!response.ok) throw new Error(`❌ HTTP Error: ${response.status}`);
 
         const users = await response.json();
@@ -1011,7 +1039,7 @@ async function updateUserRole() {
     const newRole = document.getElementById("editUserRole").value;
 
     try {
-        const response = await fetch(`http://localhost:8080/restAPIMCCabs/api/users/${id}/role`, {
+        const response = await fetch(`${userApiUrl}${id}/role`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ uRole: newRole }),
@@ -1034,7 +1062,7 @@ async function deleteUser(id) {
     if (!confirm("❌ Are you sure you want to delete this user?")) return;
 
     try {
-        const response = await fetch(`http://localhost:8080/restAPIMCCabs/api/users/${id}`, { method: "DELETE" });
+        const response = await fetch(`${userApiUrl}${id}`, { method: "DELETE" });
 
         if (!response.ok) throw new Error("❌ Failed to delete user!");
 
@@ -1129,9 +1157,6 @@ function filterReservations() {
 }
 
 
-/**
- * ✅ Load Pending Finalization Reservations
- */
 async function loadPendingReservations() {
     console.log("📌 Fetching all reservations...");
     const tableBody = document.getElementById("reservationTable");
@@ -1152,7 +1177,8 @@ async function loadPendingReservations() {
 
         let pendingReservations = allReservations.filter(reservation => {
             let endDate = new Date(reservation.endDate);
-            return new Date() > endDate;
+            let currentDate = new Date();
+            return endDate < currentDate && reservation.stat === "Approved";
         });
 
         if (pendingReservations.length === 0) {
@@ -1186,6 +1212,7 @@ async function loadPendingReservations() {
         tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Failed to load reservations.</td></tr>`;
     }
 }
+
 
 /**
  * ✅ Open Finalize Modal & Prefill Data

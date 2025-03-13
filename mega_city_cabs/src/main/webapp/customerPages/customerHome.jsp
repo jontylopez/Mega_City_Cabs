@@ -17,6 +17,8 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
         <link rel="stylesheet" href="../css/customerHome.css">
         <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     </head>
     <body>
 
