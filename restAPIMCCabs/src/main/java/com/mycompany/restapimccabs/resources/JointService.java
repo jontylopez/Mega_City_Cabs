@@ -141,4 +141,25 @@ public class JointService {
         Integer dissId; // ✅ Optional Discount ID
         Double finalPrice; // ✅ Optional Final Price
     }
+    
+ /**
+     * ✅ Get Pending Payments for a User
+     */
+    /**
+ * ✅ Get Pending Payments for a User
+ */
+@GET
+@Path("/pendingPayments/{userId}")
+@Produces(MediaType.APPLICATION_JSON)
+public Response getPendingPaymentsForUser(@PathParam("userId") int userId) {
+    List<JointOperations.PendingPaymentDetails> pendingPayments = jointOperations.getPendingPaymentsForUser(userId);
+
+    // ✅ If there are no pending payments, return an empty array
+    if (pendingPayments.isEmpty()) {
+        return Response.ok("[]").build();  // Return empty array
+    }
+
+    return Response.ok(gson.toJson(pendingPayments)).build();
+}
+
 }

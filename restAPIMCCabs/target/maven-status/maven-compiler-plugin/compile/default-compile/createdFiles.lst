@@ -3,6 +3,7 @@ com\mycompany\restapimccabs\resources\RatingsService.class
 DriverAvailability\DriverAvailability.class
 Category\Category.class
 Vehicle\VehiclesCRUD.class
+JointOperation\JointOperations$PendingPaymentDetails.class
 DiscountAvailability\DiscountAvailabilityCRUD.class
 DriverAvailability\DriverAvailabilityCRUD.class
 com\mycompany\restapimccabs\resources\ReservationFinalizeService.class

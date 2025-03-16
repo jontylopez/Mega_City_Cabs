@@ -15,8 +15,30 @@ public class UsersCRUD {
     private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     public static int addUser(Users user) {
-        String query = "INSERT INTO users (username, pWord, uRole, fullName, address, phone, email) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = ConnectionHelper.getConnection(); PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+    String checkEmailQuery = "SELECT COUNT(*) FROM users WHERE email = ?";
+    String checkUsernameQuery = "SELECT COUNT(*) FROM users WHERE username = ?";
+    String query = "INSERT INTO users (username, pWord, uRole, fullName, address, phone, email) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    
+    try (Connection conn = ConnectionHelper.getConnection(); 
+         PreparedStatement stmtCheckEmail = conn.prepareStatement(checkEmailQuery);
+         PreparedStatement stmtCheckUsername = conn.prepareStatement(checkUsernameQuery)) {
+        
+        // Check if email exists
+        stmtCheckEmail.setString(1, user.getEmail());
+        ResultSet rsEmail = stmtCheckEmail.executeQuery();
+        if (rsEmail.next() && rsEmail.getInt(1) > 0) {
+            return -2; // Email already exists
+        }
+        
+        // Check if username exists
+        stmtCheckUsername.setString(1, user.getUsername());
+        ResultSet rsUsername = stmtCheckUsername.executeQuery();
+        if (rsUsername.next() && rsUsername.getInt(1) > 0) {
+            return -3; // Username already exists
+        }
+
+        // Insert new user if email and username are unique
+        try (PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, user.getUsername());
             stmt.setString(2, encoder.encode(user.getpWord()));
             stmt.setString(3, user.getuRole());
@@ -25,15 +47,18 @@ public class UsersCRUD {
             stmt.setString(6, user.getPhone());
             stmt.setString(7, user.getEmail());
             stmt.executeUpdate();
+            
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 return rs.getInt(1);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        return -1;
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+    return -1;
+}
+
 
     public static List<Users> getUsers() {
         List<Users> users = new ArrayList<>();
@@ -189,5 +214,19 @@ public static int updateUserPassword(int id, String oldPassword, String newPassw
     return -1;
 }
 
+public static boolean isEmailExists(String email) {
+    String query = "SELECT COUNT(*) FROM users WHERE email = ?";
+    try (Connection conn = ConnectionHelper.getConnection(); 
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+        stmt.setString(1, email);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1) > 0; // Returns true if email exists
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return false; // Returns false if email does not exist
+}
 
 }

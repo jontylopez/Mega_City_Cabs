@@ -1,7 +1,3 @@
-/* 
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/JavaScript.js to edit this template
- */
 document.addEventListener("DOMContentLoaded", function () {
     let registerForm = document.getElementById("registerForm");
     if (!registerForm) {
@@ -30,6 +26,13 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        // Check if email already exists
+        let emailExists = await checkEmailExists(email);
+        if (emailExists) {
+            showMessage("⚠️ Email is already taken! Please use another one.", "warning");
+            return;
+        }
+
         let requestData = {
             username: username,
             pWord: pWord,
@@ -51,7 +54,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (!response.ok) {
                 if (response.status === 409) {
-                    showMessage("⚠️ Username or Email is already taken!", "warning");
+                    showMessage(responseData.message, "warning");
                 } else {
                     throw new Error(responseData.message || "Registration failed");
                 }
@@ -69,6 +72,17 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    async function checkEmailExists(email) {
+        try {
+            const response = await fetch(`http://localhost:8080/restAPIMCCabs/api/users/checkEmail/${email}`);
+            const data = await response.json();
+            return data.message === "Email already exists.";
+        } catch (error) {
+            console.error("❌ Error checking email existence", error);
+            return false;
+        }
+    }
+
     function showMessage(message, type) {
         let messageBox = document.getElementById("messageBox");
         if (messageBox) {
@@ -78,4 +92,3 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 });
-

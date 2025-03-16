@@ -76,7 +76,16 @@
                                 </select>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-success mt-3"><i class="bi bi-plus-circle"></i> Add Category</button>
+                        <button type="submit" class="btn btn-success mt-3" onclick="checkSVG(event)">
+                            <i class="bi bi-plus-circle"></i> Add Category
+                        </button>
+
+                        <p id="warningMessage" style="color: red; font-style: italic; display: none;">
+                            Warning: There is no SVG file named <span id="categoryNameWarning"></span>.svg in the images folder.
+                            This may cause issues when loading categories in the customer end.
+                            Contact developer support for more info.
+                        </p>
+
                     </form>
                 </div>
             </div>

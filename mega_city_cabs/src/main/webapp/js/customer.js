@@ -188,8 +188,8 @@ async function loadTripDetails(userId = null) {
 
         const today = new Date().toISOString().split("T")[0];
         const upcomingTrips = reservations
-                .filter(trip => new Date(trip.stDate) >= new Date(today) && trip.stat !== "Cancelled")
-                .sort((a, b) => new Date(a.stDate) - new Date(b.stDate));
+            .filter(trip => new Date(trip.stDate) >= new Date(today) && trip.stat !== "Cancelled")
+            .sort((a, b) => new Date(a.stDate) - new Date(b.stDate));
 
         if (upcomingTrips.length === 0) {
             console.log("❌️ No upcoming trips available.");
@@ -199,6 +199,35 @@ async function loadTripDetails(userId = null) {
 
         const nextTrip = upcomingTrips[0];
         console.log("✅ Next Trip:", nextTrip);
+
+        // Fetch vehicle details to get category ID
+        let vehicleCategoryName = "Not Assigned";
+        if (nextTrip.vehicleId) {
+            const vehicleResponse = await fetch(`${vehicleApiUrl}/${nextTrip.vehicleId}`);
+            if (vehicleResponse.ok) {
+                const vehicleData = await vehicleResponse.json();
+                const catId = vehicleData.catId;
+
+                // Fetch category name using the catId
+                if (catId) {
+                    const categoryResponse = await fetch(`${categoryApiUrl}/${catId}`);
+                    if (categoryResponse.ok) {
+                        const categoryData = await categoryResponse.json();
+                        vehicleCategoryName = categoryData.catName || "Not Assigned";
+                    }
+                }
+            }
+        }
+
+        // Fetch driver details (dName) based on driverId
+        let driverName = "Not Assigned";
+        if (nextTrip.driverId) {
+            const driverResponse = await fetch(`${driverApiUrl}${nextTrip.driverId}`);
+            if (driverResponse.ok) {
+                const driverData = await driverResponse.json();
+                driverName = driverData.dName || "Not Assigned";
+            }
+        }
 
         // 🔹 Get DOM elements
         const tripDetailsContainer = document.getElementById("tripDetailsContainer");
@@ -222,22 +251,14 @@ async function loadTripDetails(userId = null) {
             tripFinalPrice: document.getElementById("tripFinalPrice")
         };
 
-        if (elements.tripId)
-            elements.tripId.value = nextTrip.id || "";
-        if (elements.tripStartDate)
-            elements.tripStartDate.value = nextTrip.stDate || "";
-        if (elements.tripEndDate)
-            elements.tripEndDate.value = nextTrip.endDate || "";
-        if (elements.tripStartTime)
-            elements.tripStartTime.value = nextTrip.stTime || "N/A";
-        if (elements.tripLocation)
-            elements.tripLocation.value = nextTrip.stLocation || "";
-        if (elements.tripVehicle)
-            elements.tripVehicle.value = nextTrip.vehicleId || "Not Assigned";
-        if (elements.tripDriver)
-            elements.tripDriver.value = nextTrip.driverId || "Not Assigned";
-        if (elements.tripStatus)
-            elements.tripStatus.value = nextTrip.stat || "";
+        if (elements.tripId) elements.tripId.value = nextTrip.id || "";
+        if (elements.tripStartDate) elements.tripStartDate.value = nextTrip.stDate || "";
+        if (elements.tripEndDate) elements.tripEndDate.value = nextTrip.endDate || "";
+        if (elements.tripStartTime) elements.tripStartTime.value = nextTrip.stTime || "N/A";
+        if (elements.tripLocation) elements.tripLocation.value = nextTrip.stLocation || "";
+        if (elements.tripVehicle) elements.tripVehicle.value = vehicleCategoryName; // Set vehicle category name
+        if (elements.tripDriver) elements.tripDriver.value = driverName; // Set driver name
+        if (elements.tripStatus) elements.tripStatus.value = nextTrip.stat || "";
 
         // ✅ Fetch discount percentage if applicable
         if (nextTrip.dissId) {
@@ -260,8 +281,9 @@ async function loadTripDetails(userId = null) {
     } catch (error) {
         console.error("🚨 Error loading trip details:", error);
         showNoUpcomingTrips();
+    }
 }
-}
+
 
 function showNoUpcomingTrips() {
     const tripDetailsContainer = document.getElementById("tripDetailsContainer");
@@ -297,14 +319,24 @@ async function loadPendingPayments() {
 
     tableBody.innerHTML = `<tr><td colspan="3" class="text-center">Loading...</td></tr>`;
 
+    const userId = getSessionUserId(); // Assuming you have a function to get the logged-in user ID from the session
+
+    if (!userId) {
+        console.error("🚨 User ID not found in session!");
+        tableBody.innerHTML = `<tr><td colspan="3" class="text-center">User not found. Please log in.</td></tr>`;
+        return;
+    }
+
     try {
-        const response = await fetch(`${reservationFinalizeApiUrl}/all`);
-        if (!response.ok)
-            throw new Error("Failed to fetch payments.");
+        // Fetch pending payments for the logged-in user
+        const response = await fetch(`${jointApiUrl}/pendingPayments/${userId}`);
+        if (!response.ok) {
+            throw new Error("Failed to fetch pending payments.");
+        }
 
-        let pendingPayments = await response.json();
-        pendingPayments = pendingPayments.filter(payment => payment.stat === "Pending");
+        const pendingPayments = await response.json();
 
+        // If no pending payments, hide the section
         if (pendingPayments.length === 0) {
             pendingPaymentsSection.style.display = "none"; // ✅ Hide section if no pending payments
             return;
@@ -312,15 +344,17 @@ async function loadPendingPayments() {
             pendingPaymentsSection.style.display = "block"; // ✅ Show section if payments exist
         }
 
-        tableBody.innerHTML = "";
+        tableBody.innerHTML = ""; // Reset table body
 
+        // Loop through each payment and display it
         pendingPayments.forEach(payment => {
+            // Assuming you have a property like payment.resId, payment.price
             const row = `
                 <tr>
                     <td>${payment.resId}</td>
                     <td>Rs. ${payment.price.toFixed(2)}</td>
                     <td>
-                        <button class="btn btn-info btn-sm" onclick="viewPendingPayment(${payment.id}, ${payment.resId})">
+                        <button class="btn btn-info btn-sm" onclick="viewPendingPayment(${payment.paymentId}, ${payment.resId})">
                             <i class="fas fa-eye"></i> View
                         </button>
                     </td>
@@ -333,6 +367,8 @@ async function loadPendingPayments() {
         tableBody.innerHTML = `<tr><td colspan="3" class="text-danger text-center">Failed to load payments.</td></tr>`;
     }
 }
+
+
 
 async function viewPendingPayment(finalizeId, resId) {
     console.log(`📌 Viewing details for Finalization ID: ${finalizeId}`);

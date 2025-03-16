@@ -23,21 +23,32 @@ public class UserService {
     private final Gson gson = new Gson();
 
     @POST
-    @Path("/create")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response addUser(String json) {
-        Users user = gson.fromJson(json, Users.class);
-        int userId = usersCRUD.addUser(user);
-        if (userId > 0) {
-            return Response.status(Response.Status.CREATED)
-                    .entity("{\"message\": \"User created successfully\", \"userId\": " + userId + "}")
-                    .build();
-        }
+@Path("/create")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+public Response addUser(String json) {
+    Users user = gson.fromJson(json, Users.class);
+    int userId = usersCRUD.addUser(user);
+
+    if (userId > 0) {
+        return Response.status(Response.Status.CREATED)
+                .entity("{\"message\": \"User created successfully\", \"userId\": " + userId + "}")
+                .build();
+    } else if (userId == -2) {
+        return Response.status(Response.Status.CONFLICT)  // Conflict status for email already exists
+                .entity("{\"message\": \"Email already exists.\"}")
+                .build();
+    } else if (userId == -3) {
+        return Response.status(Response.Status.CONFLICT)  // Conflict status for username already exists
+                .entity("{\"message\": \"Username already exists.\"}")
+                .build();
+    } else {
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity("{\"message\": \"Failed to create user\"}")
                 .build();
     }
+}
+
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -163,6 +174,18 @@ public class UserService {
         } else {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("{\"error\": \"Failed to update password.\"}").build();
+        }
+    }
+    @GET
+    @Path("/checkEmail/{email}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response checkEmailExists(@PathParam("email") String email) {
+        boolean emailExists = UsersCRUD.isEmailExists(email);
+
+        if (emailExists) {
+            return Response.ok("{\"message\": \"Email already exists.\"}").build();
+        } else {
+            return Response.ok("{\"message\": \"Email does not exist.\"}").build();
         }
     }
 }

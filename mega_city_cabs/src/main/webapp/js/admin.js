@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
     console.log("📌 Admin Dashboard Loaded!");
-
     // Load default admin dashboard
     loadPage("adminDash.jsp");
 
@@ -26,24 +25,36 @@ function loadPage(url) {
                 setupLinks(); // Ensure links are clickable
 
                 console.log("✅ Page Loaded: ", url);
-                
+
                 if (url.includes("adminDash.jsp")) {
-                 console.log("📌 Admin Dashboard Loaded! Fetching pending reservations...");
-                setTimeout(loadPendingReservations, 500);
-            }
-            
-            if (url.includes("bookingManager.jsp")) {
-                 setTimeout(loadAllReservations, 500);
-                
-            }
+                    console.log("📌 Admin Dashboard Loaded! Fetching pending reservations...");
+                    setTimeout(loadPendingReservations, 500);
+                }
+
+                if (url.includes("bookingManager.jsp")) {
+                    setTimeout(loadAllReservations, 500);
+                }
 
                 // ✅ Handle Category Manager
                 if (url.includes("categoryManager.jsp")) {
                     console.log("📌 Category Manager Loaded! Fetching categories...");
                     updateCategoryTable();
 
-                    // ✅ Ensure Category Form works
-                    setupForm("categoryForm", createCategory);
+                    // Remove the existing inline onclick handler from the button
+                    const addCategoryBtn = document.querySelector("#categoryForm button[type='submit']");
+                    if (addCategoryBtn) {
+                        // Remove the inline onclick attribute
+                        addCategoryBtn.removeAttribute("onclick");
+                    }
+
+                    // Set up the form with a single event handler
+                    const categoryForm = document.getElementById("categoryForm");
+                    if (categoryForm) {
+                        categoryForm.addEventListener("submit", function (event) {
+                            event.preventDefault(); // Prevent form submission
+                            checkSVG(event);       // Call checkSVG function
+                        });
+                    }
                 }
 
                 // ✅ Handle Vehicle Manager
@@ -66,16 +77,18 @@ function loadPage(url) {
                     // ✅ Ensure Driver Form works
                     setupForm("driverForm", createDriver);
                 }
+
                 if (url.includes("discountManager.jsp")) {
                     console.log("📌 Discount Manager Loaded! Fetching Discounts...");
                     loadDiscounts();
                     setTimeout(loadDiscounts, 500); // ✅ Add delay to ensure table is loaded
                 }
+
                 if (url.includes("userManager.jsp")) {
                     console.log("📌 User Manager Loaded! Fetching Users...");
                     loadUsers();
-
                 }
+
                 if (url.includes("adminProfile.jsp")) {
                     console.log("📌 Profile Page Loaded! Fetching user details...");
                     setTimeout(loadUserProfile, 500);  // Ensure it runs after content is loaded
@@ -83,6 +96,7 @@ function loadPage(url) {
             })
             .catch(error => console.error("❌ Error loading page:", error));
 }
+
 /**
  * ✅ Get Logged-in User ID from SessionStorage
  */
@@ -136,7 +150,7 @@ const discountApiUrl = "http://localhost:8080/restAPIMCCabs/api/discounts/";
 const userApiUrl = "http://localhost:8080/restAPIMCCabs/api/users/";
 const ratingApiUrl = "http://localhost:8080/restAPIMCCabs/api/ratings/";
 const reservationApiUrl = "http://localhost:8080/restAPIMCCabs/api/reservations/";
-const reservationFinalizeApiUrl = "http://localhost:8080/restAPIMCCabs/api/reservation_finalize/";  
+const reservationFinalizeApiUrl = "http://localhost:8080/restAPIMCCabs/api/reservation_finalize/";
 
 // ==============================================================================================================================
 //                                                  🔹 Common Functions
@@ -210,7 +224,8 @@ async function loadPendingReservations() {
 
     try {
         const response = await fetch(reservationApiUrl + "all");
-        if (!response.ok) throw new Error("🚨 Failed to fetch reservations!");
+        if (!response.ok)
+            throw new Error("🚨 Failed to fetch reservations!");
 
         let allReservations = await response.json();
         console.log("✅ All Reservations:", allReservations);
@@ -230,8 +245,7 @@ async function loadPendingReservations() {
 
         for (const reservation of pendingReservations) {
             const user = await fetch(userApiUrl + reservation.userId)
-                .then(res => res.ok ? res.json() : { fullName: "Unknown User" });
-
+                    .then(res => res.ok ? res.json() : {fullName: "Unknown User"});
             const row = `
                 <tr>
                     <td>${reservation.id}</td>
@@ -265,11 +279,13 @@ async function openFinalizeModal(id, vehicleId, stDate, endDate) {
 
     try {
         const vehicleResponse = await fetch(`${vehicleApiUrl}${vehicleId}`);
-        if (!vehicleResponse.ok) throw new Error("Failed to fetch vehicle details");
+        if (!vehicleResponse.ok)
+            throw new Error("Failed to fetch vehicle details");
         const vehicle = await vehicleResponse.json();
 
         const categoryResponse = await fetch(`${categoryApiUrl}${vehicle.catId}`);
-        if (!categoryResponse.ok) throw new Error("Failed to fetch category details");
+        if (!categoryResponse.ok)
+            throw new Error("Failed to fetch category details");
         const category = await categoryResponse.json();
 
         console.log("🚗 Vehicle Details:", vehicle);
@@ -320,8 +336,8 @@ async function finalizeTrip() {
             console.log(`✅ Finalizing reservation ${reservationId} without extra charges.`);
             const statusResponse = await fetch(`${reservationApiUrl}updateStatus/${reservationId}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ stat: "Finalized" })
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({stat: "Finalized"})
             });
 
             if (statusResponse.ok) {
@@ -334,7 +350,7 @@ async function finalizeTrip() {
             console.log(`📌 Adding reservation_finalize entry for reservation ${reservationId}.`);
             const finalizeResponse = await fetch(`${reservationFinalizeApiUrl}create`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({
                     resId: reservationId,
                     extraKm: extraKm,
@@ -344,16 +360,18 @@ async function finalizeTrip() {
                 })
             });
 
-            if (!finalizeResponse.ok) throw new Error("Failed to add finalize record!");
+            if (!finalizeResponse.ok)
+                throw new Error("Failed to add finalize record!");
 
             console.log(`✅ Changing reservation ${reservationId} status to 'PendingPayment'.`);
             const statusResponse = await fetch(`${reservationApiUrl}updateStatus/${reservationId}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ stat: "PendingPayment" })
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({stat: "PendingPayment"})
             });
 
-            if (!statusResponse.ok) throw new Error("Failed to update reservation status!");
+            if (!statusResponse.ok)
+                throw new Error("Failed to update reservation status!");
 
             alert("🎉 Reservation finalized with additional charges!");
         }
@@ -387,7 +405,8 @@ async function loadAllReservations() {
 
     try {
         const response = await fetch(reservationApiUrl + "all");
-        if (!response.ok) throw new Error("🚨 Failed to fetch reservations!");
+        if (!response.ok)
+            throw new Error("🚨 Failed to fetch reservations!");
 
         let reservations = await response.json();
         console.log("✅ All Reservations:", reservations);
@@ -401,14 +420,14 @@ async function loadAllReservations() {
 
         for (const reservation of reservations) {
             // ✅ Fetch User & Vehicle first
-            const userPromise = fetch(userApiUrl + reservation.userId).then(res => res.ok ? res.json() : { fullName: "Unknown User" });
-            const vehiclePromise = fetch(vehicleApiUrl + reservation.vehicleId).then(res => res.ok ? res.json() : { vehicleNo: "Unknown Vehicle", catId: null });
+            const userPromise = fetch(userApiUrl + reservation.userId).then(res => res.ok ? res.json() : {fullName: "Unknown User"});
+            const vehiclePromise = fetch(vehicleApiUrl + reservation.vehicleId).then(res => res.ok ? res.json() : {vehicleNo: "Unknown Vehicle", catId: null});
 
             const [user, vehicle] = await Promise.all([userPromise, vehiclePromise]);
 
             // ✅ Fetch Category & Driver only after vehicle is fetched
-            const categoryPromise = vehicle.catId ? fetch(categoryApiUrl + vehicle.catId).then(res => res.ok ? res.json() : { catName: "Unknown Category" }) : { catName: "Unknown Category" };
-            const driverPromise = reservation.driverId ? fetch(driverApiUrl + reservation.driverId).then(res => res.ok ? res.json() : { dName: "Not Assigned" }) : { dName: "Not Assigned" };
+            const categoryPromise = vehicle.catId ? fetch(categoryApiUrl + vehicle.catId).then(res => res.ok ? res.json() : {catName: "Unknown Category"}) : {catName: "Unknown Category"};
+            const driverPromise = reservation.driverId ? fetch(driverApiUrl + reservation.driverId).then(res => res.ok ? res.json() : {dName: "Not Assigned"}) : {dName: "Not Assigned"};
             const ratingPromise = reservation.ratId ? fetch(`${ratingApiUrl}${reservation.ratId}`).then(res => res.ok ? res.json() : null) : null;
 
             const [category, driver, rating] = await Promise.all([categoryPromise, driverPromise, ratingPromise]);
@@ -445,28 +464,28 @@ async function loadAllReservations() {
 
 function openRatingModal(ratingId) {
     fetch(`${ratingApiUrl}${ratingId}`)
-        .then(response => response.json())
-        .then(rating => {
-            document.getElementById("modalTripRating").innerText = rating.tripRating + " ⭐";
-            document.getElementById("modalVehicleRating").innerText = rating.vehicleRating + " ⭐";
-            document.getElementById("modalDriverRating").innerText = rating.driverRating + " ⭐";
-            document.getElementById("modalRatingComment").value = rating.comment || "No comments provided.";
-            
-            // Show modal
-            document.getElementById("ratingModal").style.display = "flex";
-            
-            // Force reflow and prevent scroll on body
-            document.body.style.overflow = "hidden";
-        })
-        .catch(error => {
-            console.error("🚨 Error fetching rating details:", error);
-            alert("❌ Error loading rating details.");
-        });
+            .then(response => response.json())
+            .then(rating => {
+                document.getElementById("modalTripRating").innerText = rating.tripRating + " ⭐";
+                document.getElementById("modalVehicleRating").innerText = rating.vehicleRating + " ⭐";
+                document.getElementById("modalDriverRating").innerText = rating.driverRating + " ⭐";
+                document.getElementById("modalRatingComment").value = rating.comment || "No comments provided.";
+
+                // Show modal
+                document.getElementById("ratingModal").style.display = "flex";
+
+                // Force reflow and prevent scroll on body
+                document.body.style.overflow = "hidden";
+            })
+            .catch(error => {
+                console.error("🚨 Error fetching rating details:", error);
+                alert("❌ Error loading rating details.");
+            });
 }
 
 function closeRatingModal() {
     document.getElementById("ratingModal").style.display = "none";
-    
+
     // Re-enable scrolling
     document.body.style.overflow = "";
 }
@@ -528,17 +547,87 @@ async function updateCategoryTable() {
 
     console.log("✅ Category Table Updated!");
 }
+async function checkSVG(event) {
+    event.preventDefault(); // Prevent form submission initially
+    
+    const categoryName = document.getElementById("catName").value.trim();
+    const warningMessage = document.getElementById('warningMessage');
+    const categoryNameWarning = document.getElementById('categoryNameWarning');
+    
+    try {
+        // Create a new FileReader and check if file exists locally
+        // We'll use a more reliable approach by checking the existence in the browser storage
+        const fileExists = await checkLocalSVGExists(categoryName);
+        
+        if (fileExists) {
+            // File exists, proceed with category creation
+            warningMessage.style.display = 'none';
+            await createCategory();
+        } else {
+            // File doesn't exist, show warning but allow submission
+            console.log(`No SVG found for category: ${categoryName}`);
+            warningMessage.style.display = 'block';
+            categoryNameWarning.textContent = `${categoryName}.svg`;
+            
+            // You could add a confirmation here if you want
+            // if (confirm(`No SVG found for "${categoryName}". Create anyway?`)) {
+            //     await createCategory();
+            // }
+        }
+    } catch (error) {
+        console.log(`Error checking SVG: ${error}`);
+        warningMessage.style.display = 'block';
+        categoryNameWarning.textContent = `${categoryName}.svg`;
+    }
+}
 
+// Function to check if SVG exists locally
+function checkLocalSVGExists(categoryName) {
+    return new Promise((resolve) => {
+        // Create an object URL for the SVG path
+        const svgFilePath = `../images/${categoryName}.svg`;
+        
+        // Use a temporary image element to check if the file exists
+        const tempImg = new Image();
+        
+        // Set up a timeout to handle the case where the image doesn't load
+        const timeoutId = setTimeout(() => {
+            // If it times out, the image doesn't exist
+            tempImg.onload = null;
+            tempImg.onerror = null;
+            resolve(false);
+        }, 500); // 500ms timeout
+        
+        // If the image loads successfully, the file exists
+        tempImg.onload = function() {
+            clearTimeout(timeoutId);
+            resolve(true);
+        };
+        
+        // If there's an error loading the image, the file doesn't exist
+        tempImg.onerror = function() {
+            clearTimeout(timeoutId);
+            resolve(false);
+        };
+        
+        // Set the source of the image to try loading it
+        // Use a cache-busting parameter to prevent caching
+        tempImg.src = `${svgFilePath}?cb=${new Date().getTime()}`;
+        
+        // This approach will still trigger a 404 in the console, but it will
+        // be less noticeable and we can detect file existence without fetch
+    });
+}
 async function createCategory() {
     const category = {
-        catName: document.getElementById("catName").value,
+        catName: document.getElementById("catName").value.trim(),
         maxPsngr: parseInt(document.getElementById("maxPsngr").value),
         perDayValue: parseFloat(document.getElementById("perDayValue").value),
         maxKmPerDay: parseInt(document.getElementById("maxKmPerDay").value),
         milePkg1: parseFloat(document.getElementById("milePkg1").value),
-        pkg1Hrs: parseInt(document.getElementById("pkg1Hrs").value), // ✅ New Field
+        pkg1Hrs: parseInt(document.getElementById("pkg1Hrs").value),
         milePkg2: parseFloat(document.getElementById("milePkg2").value),
-        pkg2Hrs: parseInt(document.getElementById("pkg2Hrs").value), // ✅ New Field
+        pkg2Hrs: parseInt(document.getElementById("pkg2Hrs").value),
         waitingPerHr: parseFloat(document.getElementById("waitingPerHr").value),
         extraKm: parseFloat(document.getElementById("extraKm").value),
         active: document.getElementById("active").value
@@ -558,7 +647,7 @@ async function createCategory() {
 
         if (response.ok) {
             alert("✅ Category Created Successfully!");
-            updateCategoryTable(); // Refresh list
+            await updateCategoryTable(); // Refresh list
             document.getElementById("categoryForm").reset();
         } else {
             console.error("❌ Insert Failed:", responseData);
@@ -567,6 +656,7 @@ async function createCategory() {
         console.error("🚨 Fetch Error:", error);
     }
 }
+
 
 function editCategory(id, catName, maxPsngr, perDayValue, maxKmPerDay, milePkg1, pkg1Hrs, milePkg2, pkg2Hrs, waitingPerHr, extraKm, active) {
     document.getElementById("updateCategoryId").value = id;
@@ -734,7 +824,8 @@ async function createVehicle(event) {
     const regExpDateInput = document.getElementById("regExpDate");
 
     // 🚨 Validate Registration Expiry Date
-    if (!isValidFutureDate(regExpDateInput)) return;
+    if (!isValidFutureDate(regExpDateInput))
+        return;
 
     const vehicle = {
         catId: catId,
@@ -912,7 +1003,8 @@ async function createDriver() {
     const dLExpDateInput = document.getElementById("dLExpDate");
 
     // 🚨 Validate Driver License Expiry Date
-    if (!isValidFutureDate(dLExpDateInput)) return;
+    if (!isValidFutureDate(dLExpDateInput))
+        return;
 
     const driver = {
         dName: document.getElementById("dName").value.trim(),
@@ -1125,7 +1217,8 @@ async function addDiscount() {
     const dStatus = document.getElementById("discountStatus").value;
 
     // 🚨 Validate Start and End Dates
-    if (!isValidFutureDate(startDateInput) || !isValidFutureDate(endDateInput)) return;
+    if (!isValidFutureDate(startDateInput) || !isValidFutureDate(endDateInput))
+        return;
 
     const discountData = {
         percentage,
@@ -1247,7 +1340,8 @@ async function loadUsers() {
 
     try {
         const response = await fetch(userApiUrl);
-        if (!response.ok) throw new Error(`❌ HTTP Error: ${response.status}`);
+        if (!response.ok)
+            throw new Error(`❌ HTTP Error: ${response.status}`);
 
         const users = await response.json();
         console.log("✅ Retrieved Users:", users);
@@ -1297,11 +1391,12 @@ async function updateUserRole() {
     try {
         const response = await fetch(`${userApiUrl}${id}/role`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ uRole: newRole }),
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({uRole: newRole}),
         });
 
-        if (!response.ok) throw new Error("❌ Failed to update user role!");
+        if (!response.ok)
+            throw new Error("❌ Failed to update user role!");
 
         alert("✅ User role updated successfully!");
         loadUsers(); // Refresh user list
@@ -1314,12 +1409,14 @@ async function updateUserRole() {
 }
 
 async function deleteUser(id) {
-    if (!confirm("❌ Are you sure you want to delete this user?")) return;
+    if (!confirm("❌ Are you sure you want to delete this user?"))
+        return;
 
     try {
-        const response = await fetch(`${userApiUrl}${id}`, { method: "DELETE" });
+        const response = await fetch(`${userApiUrl}${id}`, {method: "DELETE"});
 
-        if (!response.ok) throw new Error("❌ Failed to delete user!");
+        if (!response.ok)
+            throw new Error("❌ Failed to delete user!");
 
         alert("✅ User Deleted Successfully!");
         loadUsers();
@@ -1344,7 +1441,8 @@ async function loadUserProfile() {
 
     try {
         const response = await fetch(`${userApiUrl}${userId}`); // ✅ Fixed URL
-        if (!response.ok) throw new Error("🚨 Failed to fetch user data!");
+        if (!response.ok)
+            throw new Error("🚨 Failed to fetch user data!");
 
         const user = await response.json();
         console.log("✅ User Data:", user);
